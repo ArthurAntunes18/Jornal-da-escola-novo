@@ -852,11 +852,43 @@
   let indexEdicao  = null;      // índice do item sendo editado (null = novo)
 
   // Carrega dados do localStorage (ou usa arrays vazios se for a primeira vez)
-  let noticias     = JSON.parse(localStorage.getItem('noticias')    || '[]');
-  let fotos        = JSON.parse(localStorage.getItem('fotos')       || '[]');
-  let cardapio     = JSON.parse(localStorage.getItem('cardapio')    || '{}');
-  let programacao  = JSON.parse(localStorage.getItem('programacao') || '[]');
+  // Alterar a SEÇÃO 2 do seu código para ficar assim:
+let noticias = [];
+let fotos = [];
+let cardapio = [];
+let programacao = [];
 
+// Função para buscar tudo do Firebase assim que a página abrir
+async function carregarDadosDoFirebase() {
+  try {
+    // 1. Puxa as Notícias
+    const snapNoticias = await getDocs(query(collection(db, "noticias")));
+    noticias = snapNoticias.docs.map(doc => doc.data());
+
+    // 2. Puxa as Fotos
+    const snapFotos = await getDocs(query(collection(db, "fotos")));
+    fotos = snapFotos.docs.map(doc => doc.data());
+
+    // 3. Puxa o Cardápio
+    const snapCardapio = await getDocs(query(collection(db, "cardapio")));
+    cardapio = snapCardapio.docs.map(doc => doc.data());
+
+    // 4. Puxa a Programação
+    const snapProgramacao = await getDocs(query(collection(db, "programacao")));
+    programacao = snapProgramacao.docs.map(doc => doc.data());
+
+    // CHAME AQUI A SUA FUNÇÃO QUE DESENHA AS NOTÍCIAS NA TELA
+    // Exemplo: mostrarNoticias(); ou atualizarTela();
+    renderNoticias()
+    
+    console.log("Todos os dados foram carregados do Firebase!");
+  } catch (erro) {
+    console.error("Erro ao carregar dados do Firebase:", erro);
+  }
+}
+
+// Executa a busca assim que a página carregar
+carregarDadosDoFirebase();
   /* =============================================================
      SEÇÃO 3 — NAVEGAÇÃO ENTRE ABAS
   ============================================================= */
@@ -1282,5 +1314,35 @@
   renderProgramacao();
 
   </script>
+  <script type="module">
+  // 1. Importa os módulos necessários (Prontos para o Banco de Dados)
+  import { initializeApp } from "https://gstatic.com";
+  import { getFirestore, collection, addDoc, getDocs, orderBy, query } from "https://gstatic.com";
+
+  // 2. Suas credenciais da foto
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3GuHjxDGtIdnwldbhu8-aeY-MKVYAJ84",
+    authDomain: "://firebaseapp.com",
+    projectId: "jornal-gsr",
+    storageBucket: "jornal-gsr.firebasestorage.app",
+    messagingSenderId: "1092908555548",
+    appId: "1:1092908555548:web:132c241b7b434a9f32aed9",
+    measurementId: "G-RV8JM9ZSHM"
+  };
+
+  // 3. Inicializa o Firebase e o Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Expondo o banco para usar em outros scripts se precisar
+  window.db = db;
+  window.collection = collection;
+  window.addDoc = addDoc;
+  window.getDocs = getDocs;
+  window.orderBy = orderBy;
+  window.query = query;
+
+  console.log("Firebase conectado com sucesso!");
+</script>
 </body>
 </html>
