@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jornal Escolar</title>
+
+  <!-- ========================================================
+       FONTE: Playfair Display (títulos) + Source Sans 3 (corpo)
+       Carregadas do Google Fonts
+  ======================================================== -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ============================================================
+       VARIÁVEIS DE COR — edite aqui para mudar o tema inteiro
+    ============================================================ */
+    :root {
+      --preto:    #0a0a0a;
+      --branco:   #f5f5f0;
+      --amarelo:  #f5c400;
+      --cinza:    #1c1c1c;
+      --cinza2:   #2e2e2e;
+      --borda:    #333;
+      --fonte-titulo: 'Playfair Display', serif;
+      --fonte-corpo:  'Source Sans 3', sans-serif;
+    }
+
+    /* ============================================================
+       RESET E BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--preto);
+      color: var(--branco);
+      font-family: var(--fonte-corpo);
+      font-size: 18px;      /* fonte maior para legibilidade */
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ============================================================
+       TOPO / CABEÇALHO DO JORNAL
+    ============================================================ */
+    header {
+      background: var(--preto);
+      border-bottom: 4px solid var(--amarelo);
+      padding: 24px 48px 16px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo-area h1 {
+      font-family: var(--fonte-titulo);
+      font-size: clamp(2rem, 5vw, 3.5rem); /* tamanho responsivo */
+      color: var(--amarelo);
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    /* ============================================================
+       NOME DA ESCOLA — edite o texto abaixo no HTML
+    ============================================================ */
+    .logo-area span {
+      font-size: 0.85rem;
+      color: #888;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* Botão de login no canto superior direito */
+    #btn-login-topo {
+      background: transparent;
+      border: 2px solid var(--amarelo);
+      color: var(--amarelo);
+      padding: 8px 20px;
+      font-family: var(--fonte-corpo);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: background .2s, color .2s;
+    }
+    #btn-login-topo:hover { background: var(--amarelo); color: var(--preto); }
+
+    /* Texto que aparece quando o editor está logado */
+    #status-editor {
+      font-size: 0.85rem;
+      color: var(--amarelo);
+      display: none; /* fica oculto até o login */
+    }
+
+    /* ============================================================
+       NAVEGAÇÃO DE ABAS
+    ============================================================ */
+    nav {
+      background: var(--cinza);
+      border-bottom: 2px solid var(--borda);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    nav button {
+      flex: 1;
+      min-width: 140px;
+      background: transparent;
+      border: none;
+      border-bottom: 4px solid transparent;
+      color: #888;
+      padding: 18px 24px;
+      font-family: var(--fonte-corpo);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+    nav button:hover  { color: var(--branco); }
+    nav button.ativa  { color: var(--amarelo); border-bottom-color: var(--amarelo); }
+
+    /* ============================================================
+       CONTEÚDO PRINCIPAL
+    ============================================================ */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    /* Abas ficam ocultas; só a ativa é exibida */
+    .aba { display: none; }
+    .aba.ativa { display: block; }
+
+    /* Título de cada seção */
+    .secao-titulo {
+      font-family: var(--fonte-titulo);
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      color: var(--amarelo);
+      border-bottom: 2px solid var(--borda);
+      padding-bottom: 12px;
+      margin-bottom: 40px;
+    }
+
+    /* ============================================================
+       CARTÕES — usados no jornal, fotos e cardápio
+    ============================================================ */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 32px;
+    }
+
+    .card {
+      background: var(--cinza);
+      border: 1px solid var(--borda);
+      overflow: hidden;
+      transition: transform .2s, border-color .2s;
+      position: relative;
+    }
+    .card:hover { transform: translateY(-4px); border-color: var(--amarelo); }
+
+    .card img, .card video {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-corpo {
+      padding: 20px;
+    }
+
+    .card-corpo h2 {
+      font-family: var(--fonte-titulo);
+      font-size: 1.4rem;
+      color: var(--branco);
+      margin-bottom: 8px;
+    }
+
+    .card-corpo p {
+      color: #aaa;
+      font-size: 1rem;
+    }
+
+    .card-data {
+      font-size: 0.8rem;
+      color: var(--amarelo);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Botões de edição que aparecem somente para editores logados */
+    .acoes-editor {
+      display: none; /* escondido por padrão */
+      gap: 8px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--borda);
+    }
+    .acoes-editor button {
+      background: transparent;
+      border: 1px solid var(--amarelo);
+      color: var(--amarelo);
+      padding: 6px 14px;
+      font-family: var(--fonte-corpo);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .acoes-editor button:hover { background: var(--amarelo); color: var(--preto); }
+    .acoes-editor button.excluir { border-color: #e74c3c; color: #e74c3c; }
+    .acoes-editor button.excluir:hover { background: #e74c3c; color: var(--branco); }
+
+    /* ============================================================
+       BOTÃO FLUTUANTE — "Nova Publicação" (só para editores)
+    ============================================================ */
+    #fab {
+      position: fixed;
+      bottom: 36px;
+      right: 36px;
+      background: var(--amarelo);
+      color: var(--preto);
+      border: none;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      font-size: 2rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: none; /* visível somente após login */
+      box-shadow: 0 8px 32px rgba(245,196,0,.4);
+      transition: transform .2s, box-shadow .2s;
+      z-index: 200;
+    }
+    #fab:hover { transform: scale(1.12); box-shadow: 0 12px 40px rgba(245,196,0,.6); }
+
+    /* ============================================================
+       MODAL GENÉRICO (login + publicação + cardápio + programação)
+    ============================================================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      display: none; /* oculto por padrão */
+    }
+    .modal-overlay.aberto { display: flex; }
+
+    .modal {
+      background: var(--cinza);
+      border: 2px solid var(--amarelo);
+      padding: 40px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal h2 {
+      font-family: var(--fonte-titulo);
+      font-size: 1.8rem;
+      color: var(--amarelo);
+      margin-bottom: 24px;
+    }
+
+    /* Campos de formulário dentro do modal */
+    .modal label {
+      display: block;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 6px;
+      margin-top: 16px;
+    }
+
+    .modal input[type="text"],
+    .modal input[type="password"],
+    .modal input[type="date"],
+    .modal input[type="time"],
+    .modal textarea,
+    .modal select {
+      width: 100%;
+      background: var(--cinza2);
+      border: 1px solid var(--borda);
+      color: var(--branco);
+      padding: 12px 16px;
+      font-family: var(--fonte-corpo);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .modal input:focus,
+    .modal textarea:focus,
+    .modal select:focus { border-color: var(--amarelo); }
+
+    .modal textarea { min-height: 120px; resize: vertical; }
+
+    /* Campo de upload de arquivo */
+    .upload-label {
+      display: block;
+      border: 2px dashed var(--borda);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+      color: #666;
+      margin-top: 16px;
+    }
+    .upload-label:hover { border-color: var(--amarelo); color: var(--amarelo); }
+    .upload-label input { display: none; }
+
+    /* Preview do arquivo antes de publicar */
+    #preview-midia {
+      margin-top: 12px;
+      max-width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      display: none;
+    }
+
+    /* Botões do modal */
+    .modal-btns {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn-primario {
+      flex: 1;
+      background: var(--amarelo);
+      color: var(--preto);
+      border: none;
+      padding: 14px;
+      font-family: var(--fonte-corpo);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: opacity .2s;
+    }
+    .btn-primario:hover { opacity: .85; }
+
+    .btn-secundario {
+      flex: 1;
+      background: transparent;
+      color: var(--branco);
+      border: 1px solid var(--borda);
+      padding: 14px;
+      font-family: var(--fonte-corpo);
+      font-size: 1rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: border-color .2s;
+    }
+    .btn-secundario:hover { border-color: var(--amarelo); }
+
+    /* Botão de fechar no canto do modal */
+    .fechar-modal {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: #666;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .fechar-modal:hover { color: var(--amarelo); }
+
+    /* Mensagem de erro do login */
+    #erro-login {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* ============================================================
+       ABA DE FOTOS — galeria em masonry simulado
+    ============================================================ */
+    .galeria {
+      columns: 3;
+      column-gap: 16px;
+    }
+    @media (max-width: 700px) { .galeria { columns: 1; } }
+    @media (max-width: 1000px) { .galeria { columns: 2; } }
+
+    .galeria-item {
+      break-inside: avoid;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .galeria-item img, .galeria-item video {
+      width: 100%;
+      display: block;
+      transition: transform .3s;
+    }
+    .galeria-item:hover img,
+    .galeria-item:hover video { transform: scale(1.04); }
+
+    .galeria-legenda {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,.8));
+      color: var(--branco);
+      padding: 24px 12px 12px;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .galeria-item:hover .galeria-legenda { opacity: 1; }
+
+    /* ============================================================
+       ABA DE CARDÁPIO
+    ============================================================ */
+    .cardapio-grupo { margin-bottom: 48px; }
+
+    .cardapio-grupo h3 {
+      font-family: var(--fonte-titulo);
+      font-size: 1.5rem;
+      color: var(--amarelo);
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--borda);
+    }
+
+    .cardapio-dia {
+      background: var(--cinza);
+      border: 1px solid var(--borda);
+      margin-bottom: 12px;
+      padding: 20px 24px;
+    }
+
+    .cardapio-dia h4 {
+      font-weight: 700;
+      color: var(--branco);
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .cardapio-dia ul {
+      list-style: none;
+      padding: 0;
+    }
+    .cardapio-dia ul li {
+      color: #aaa;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--borda);
+      font-size: 1rem;
+    }
+    .cardapio-dia ul li:last-child { border: none; }
+
+    /* ============================================================
+       ABA DE PROGRAMAÇÃO DA SEMANA
+    ============================================================ */
+    .programacao-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .prog-card {
+      background: var(--cinza);
+      border: 1px solid var(--borda);
+      border-top: 4px solid var(--amarelo);
+      padding: 20px;
+      transition: transform .2s;
+    }
+    .prog-card:hover { transform: translateY(-3px); }
+
+    .prog-dia {
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--amarelo);
+      margin-bottom: 8px;
+    }
+
+    .prog-card h3 {
+      font-family: var(--fonte-titulo);
+      font-size: 1.2rem;
+      color: var(--branco);
+      margin-bottom: 10px;
+    }
+
+    .prog-card p {
+      color: #aaa;
+      font-size: 0.95rem;
+    }
+
+    .prog-horario {
+      font-size: 0.85rem;
+      color: var(--amarelo);
+      margin-top: 12px;
+      font-weight: 700;
+    }
+
+    /* ============================================================
+       ESTADO VAZIO — quando não há conteúdo publicado
+    ============================================================ */
+    .vazio {
+      text-align: center;
+      padding: 80px 20px;
+      color: #444;
+    }
+    .vazio span { font-size: 3rem; display: block; margin-bottom: 16px; }
+    .vazio p { font-size: 1.1rem; }
+
+    /* ============================================================
+       RODAPÉ
+    ============================================================ */
+    footer {
+      border-top: 2px solid var(--borda);
+      padding: 24px 48px;
+      text-align: center;
+      color: #444;
+      font-size: 0.85rem;
+      margin-top: 80px;
+    }
+    footer strong { color: var(--amarelo); }
+
+    /* ============================================================
+       RESPONSIVIDADE GERAL
+    ============================================================ */
+    @media (max-width: 600px) {
+      header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
+      main   { padding: 24px 16px; }
+      .modal { padding: 24px 20px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       CABEÇALHO
+       ↓ Edite o nome do jornal e o nome da escola aqui ↓
+  ============================================================ -->
+  <header>
+    <div class="logo-area">
+      <h1>📰 O Estudante</h1>
+      <!-- ↓ COLOQUE O NOME DA SUA ESCOLA AQUI ↓ -->
+      <span>Escola Estadual Exemplo — Jornalismo Estudantil</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span id="status-editor">✏️ Modo Editor</span>
+      <button id="btn-login-topo" onclick="abrirLogin()">Entrar como Editor</button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MENU DE ABAS
+  ============================================================ -->
+  <nav>
+    <button class="ativa" onclick="trocarAba('jornal', this)">📰 Jornal</button>
+    <button onclick="trocarAba('fotos', this)">📷 Fotos</button>
+    <button onclick="trocarAba('cardapio', this)">🍽️ Cardápio</button>
+    <button onclick="trocarAba('programacao', this)">📅 Programação</button>
+  </nav>
+
+  <!-- ============================================================
+       CONTEÚDO PRINCIPAL
+  ============================================================ -->
+  <main>
+
+    <!-- ============================
+         ABA 1: JORNAL
+    ============================ -->
+    <section id="aba-jornal" class="aba ativa">
+      <h2 class="secao-titulo">Últimas Notícias</h2>
+      <!-- As notícias são inseridas aqui dinamicamente pelo JavaScript -->
+      <div class="grid" id="lista-noticias">
+        <!-- Estado vazio exibido quando não há notícias -->
+        <div class="vazio" style="grid-column:1/-1">
+          <span>📄</span>
+          <p>Nenhuma notícia publicada ainda.<br>Faça login como editor para começar.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================
+         ABA 2: FOTOS
+    ============================ -->
+    <section id="aba-fotos" class="aba">
+      <h2 class="secao-titulo">Galeria de Fotos & Vídeos</h2>
+      <!-- As fotos/vídeos são inseridos aqui pelo JavaScript -->
+      <div class="galeria" id="lista-fotos">
+        <div class="vazio" style="column-span:all">
+          <span>📷</span>
+          <p>Nenhuma foto publicada ainda.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================
+         ABA 3: CARDÁPIO
+    ============================ -->
+    <section id="aba-cardapio" class="aba">
+      <h2 class="secao-titulo">Cardápio Semanal</h2>
+
+      <!-- CAFÉ DA MANHÃ -->
+      <div class="cardapio-grupo">
+        <h3>☕ Café da Manhã</h3>
+        <div id="cardapio-cafe">
+          <!-- Dias preenchidos pelo JavaScript ou pelos editores -->
+        </div>
+      </div>
+
+      <!-- ALMOÇO -->
+      <div class="cardapio-grupo">
+        <h3>🍽️ Almoço</h3>
+        <div id="cardapio-almoco"></div>
+      </div>
+
+      <!-- LANCHE DA TARDE -->
+      <div class="cardapio-grupo">
+        <h3>🍎 Lanche da Tarde</h3>
+        <div id="cardapio-lanche"></div>
+      </div>
+
+      <!-- Botão só aparece para editores -->
+      <button class="btn-primario so-editor" onclick="abrirModalCardapio()"
+              style="display:none;max-width:280px;margin-top:24px;">
+        + Editar Cardápio
+      </button>
+    </section>
+
+    <!-- ============================
+         ABA 4: PROGRAMAÇÃO DA SEMANA
+    ============================ -->
+    <section id="aba-programacao" class="aba">
+      <h2 class="secao-titulo">Programação da Semana</h2>
+      <div class="programacao-grid" id="lista-programacao">
+        <div class="vazio" style="grid-column:1/-1">
+          <span>📅</span>
+          <p>Nenhum evento cadastrado ainda.</p>
+        </div>
+      </div>
+      <button class="btn-primario so-editor" onclick="abrirModalProgramacao()"
+              style="display:none;max-width:280px;margin-top:32px;">
+        + Adicionar Evento
+      </button>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       RODAPÉ
+       ↓ Edite o nome da escola e o ano aqui ↓
+  ============================================================ -->
+  <footer>
+    <strong>O Estudante</strong> — Jornal da Escola Estadual Exemplo &bull; 2025
+  </footer>
+
+  <!-- ============================================================
+       BOTÃO FLUTUANTE (FAB) — aparece só para editores logados
+  ============================================================ -->
+  <button id="fab" title="Nova Publicação" onclick="abrirModalPublicacao()">+</button>
+
+  <!-- ============================================================
+       MODAL DE LOGIN
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-login">
+    <div class="modal">
+      <button class="fechar-modal" onclick="fecharModal('modal-login')">✕</button>
+      <h2>Login de Editor</h2>
+
+      <label>Usuário</label>
+      <input type="text" id="campo-usuario" placeholder="Digite seu usuário" autocomplete="username"/>
+
+      <label>Senha</label>
+      <input type="password" id="campo-senha" placeholder="Digite sua senha" autocomplete="current-password"/>
+
+      <p id="erro-login">❌ Usuário ou senha incorretos.</p>
+
+      <div class="modal-btns">
+        <button class="btn-primario" onclick="fazerLogin()">Entrar</button>
+        <button class="btn-secundario" onclick="fecharModal('modal-login')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL DE NOVA PUBLICAÇÃO (Jornal ou Foto)
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-publicacao">
+    <div class="modal">
+      <button class="fechar-modal" onclick="fecharModal('modal-publicacao')">✕</button>
+      <h2 id="titulo-modal-pub">Nova Publicação</h2>
+
+      <label>Tipo</label>
+      <select id="pub-tipo" onchange="alterarTipoPub()">
+        <option value="noticia">📰 Notícia (Jornal)</option>
+        <option value="foto">📷 Foto / Vídeo (Galeria)</option>
+      </select>
+
+      <label>Título</label>
+      <input type="text" id="pub-titulo" placeholder="Ex: Festa Junina 2025"/>
+
+      <!-- Descrição — só aparece para notícias -->
+      <div id="bloco-descricao">
+        <label>Texto da Notícia</label>
+        <textarea id="pub-texto" placeholder="Digite o conteúdo da notícia aqui..."></textarea>
+      </div>
+
+      <!-- Legenda — só aparece para fotos -->
+      <div id="bloco-legenda" style="display:none">
+        <label>Legenda</label>
+        <input type="text" id="pub-legenda" placeholder="Ex: Alunos no pátio durante o intervalo"/>
+      </div>
+
+      <!-- Upload de imagem ou vídeo -->
+      <label class="upload-label">
+        <input type="file" id="pub-midia" accept="image/*,video/*" onchange="previewMidia(this)"/>
+        📎 Clique para enviar imagem ou vídeo
+      </label>
+      <!-- O preview aparece aqui quando o arquivo é selecionado -->
+      <img id="preview-midia" alt="Preview da mídia"/>
+
+      <div class="modal-btns">
+        <button class="btn-primario" onclick="salvarPublicacao()">Publicar</button>
+        <button class="btn-secundario" onclick="fecharModal('modal-publicacao')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL DE CARDÁPIO
+       Permite que o editor preencha o cardápio de cada refeição
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-cardapio">
+    <div class="modal">
+      <button class="fechar-modal" onclick="fecharModal('modal-cardapio')">✕</button>
+      <h2>Editar Cardápio</h2>
+
+      <label>Refeição</label>
+      <select id="card-refeicao">
+        <option value="cafe">☕ Café da Manhã</option>
+        <option value="almoco">🍽️ Almoço</option>
+        <option value="lanche">🍎 Lanche da Tarde</option>
+      </select>
+
+      <label>Dia da Semana</label>
+      <select id="card-dia">
+        <option value="Segunda-feira">Segunda-feira</option>
+        <option value="Terça-feira">Terça-feira</option>
+        <option value="Quarta-feira">Quarta-feira</option>
+        <option value="Quinta-feira">Quinta-feira</option>
+        <option value="Sexta-feira">Sexta-feira</option>
+      </select>
+
+      <label>Itens do Cardápio</label>
+      <textarea id="card-itens" placeholder="Um item por linha. Ex:&#10;Pão com manteiga&#10;Leite com achocolatado&#10;Fruta da estação"></textarea>
+
+      <div class="modal-btns">
+        <button class="btn-primario" onclick="salvarCardapio()">Salvar</button>
+        <button class="btn-secundario" onclick="fecharModal('modal-cardapio')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL DE PROGRAMAÇÃO DA SEMANA
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-programacao">
+    <div class="modal">
+      <button class="fechar-modal" onclick="fecharModal('modal-programacao')">✕</button>
+      <h2>Adicionar Evento</h2>
+
+      <label>Título do Evento</label>
+      <input type="text" id="prog-titulo" placeholder="Ex: Reunião de Pais e Mestres"/>
+
+      <label>Dia da Semana</label>
+      <select id="prog-dia">
+        <option>Segunda-feira</option>
+        <option>Terça-feira</option>
+        <option>Quarta-feira</option>
+        <option>Quinta-feira</option>
+        <option>Sexta-feira</option>
+        <option>Sábado</option>
+      </select>
+
+      <label>Horário</label>
+      <input type="time" id="prog-horario"/>
+
+      <label>Descrição</label>
+      <textarea id="prog-desc" placeholder="Detalhes do evento..."></textarea>
+
+      <div class="modal-btns">
+        <button class="btn-primario" onclick="salvarEvento()">Salvar</button>
+        <button class="btn-secundario" onclick="fecharModal('modal-programacao')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       JAVASCRIPT — toda a lógica do jornal
+  ============================================================ -->
+  <script>
+
+  /* =============================================================
+     ██████████████████████████████████████████████████████████
+     ██                                                        ██
+     ██   SEÇÃO 1 — CREDENCIAIS DE EDITOR                     ██
+     ██                                                        ██
+     ██   ↓↓↓ EDITE OS USUÁRIOS E SENHAS AQUI ↓↓↓            ██
+     ██                                                        ██
+     ██   Cada objeto dentro do array é um editor autorizado. ██
+     ██   Adicione ou remova objetos conforme necessário.      ██
+     ██   Formato: { usuario: "nome", senha: "senha" }         ██
+     ██                                                        ██
+     ██████████████████████████████████████████████████████████
+  ============================================================= */
+  const EDITORES_AUTORIZADOS = [
+    { usuario: "Franco",    senha: ""   }, // ← editor principal
+    { usuario: "Anl", senha: "escola2025" }, // ← professora orientadora
+    { usuario: "admin",      senha: "admin@jornal" } // ← administrador
+    // ↑ Adicione mais editores aqui seguindo o mesmo formato
+  ];
+
+  /* =============================================================
+     SEÇÃO 2 — ESTADO DO APLICATIVO
+     Variáveis que guardam os dados durante a sessão.
+     Os dados são salvos no localStorage do navegador,
+     então persistem ao recarregar a página.
+  ============================================================= */
+  let editorLogado = false;     // true se um editor está autenticado
+  let indexEdicao  = null;      // índice do item sendo editado (null = novo)
+
+  // Carrega dados do localStorage (ou usa arrays vazios se for a primeira vez)
+  let noticias     = JSON.parse(localStorage.getItem('noticias')    || '[]');
+  let fotos        = JSON.parse(localStorage.getItem('fotos')       || '[]');
+  let cardapio     = JSON.parse(localStorage.getItem('cardapio')    || '{}');
+  let programacao  = JSON.parse(localStorage.getItem('programacao') || '[]');
+
+  /* =============================================================
+     SEÇÃO 3 — NAVEGAÇÃO ENTRE ABAS
+  ============================================================= */
+  function trocarAba(id, btn) {
+    // Esconde todas as abas e remove classe ativa dos botões
+    document.querySelectorAll('.aba').forEach(a => a.classList.remove('ativa'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('ativa'));
+
+    // Exibe a aba selecionada e marca o botão como ativo
+    document.getElementById('aba-' + id).classList.add('ativa');
+    btn.classList.add('ativa');
+  }
+
+  /* =============================================================
+     SEÇÃO 4 — SISTEMA DE LOGIN
+  ============================================================= */
+  function abrirLogin() {
+    if (editorLogado) {
+      // Se já está logado, esta ação faz logout
+      editorLogado = false;
+      document.getElementById('btn-login-topo').textContent = 'Entrar como Editor';
+      document.getElementById('status-editor').style.display = 'none';
+      document.getElementById('fab').style.display = 'none';
+      // Esconde botões de edição e botões exclusivos de editor
+      document.querySelectorAll('.acoes-editor').forEach(e => e.style.display = 'none');
+      document.querySelectorAll('.so-editor').forEach(e => e.style.display = 'none');
+      return;
+    }
+    abrirModal('modal-login');
+  }
+
+  function fazerLogin() {
+    const usuario = document.getElementById('campo-usuario').value.trim();
+    const senha   = document.getElementById('campo-senha').value;
+
+    // Verifica se o par usuário+senha existe na lista de editores autorizados
+    const autorizado = EDITORES_AUTORIZADOS.find(
+      e => e.usuario === usuario && e.senha === senha
+    );
+
+    if (autorizado) {
+      editorLogado = true;
+      fecharModal('modal-login');
+      document.getElementById('campo-usuario').value = '';
+      document.getElementById('campo-senha').value   = '';
+      document.getElementById('erro-login').style.display = 'none';
+
+      // Atualiza a interface para o modo editor
+      document.getElementById('btn-login-topo').textContent = 'Sair do Editor';
+      document.getElementById('status-editor').style.display = 'inline';
+      document.getElementById('fab').style.display = 'flex';
+
+      // Exibe botões de edição em todos os cartões existentes
+      document.querySelectorAll('.acoes-editor').forEach(e => e.style.display = 'flex');
+      document.querySelectorAll('.so-editor').forEach(e => e.style.display = 'block');
+    } else {
+      // Exibe mensagem de erro
+      document.getElementById('erro-login').style.display = 'block';
+    }
+  }
+
+  // Permite pressionar Enter para fazer login
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('modal-login').classList.contains('aberto')) {
+      fazerLogin();
+    }
+  });
+
+  /* =============================================================
+     SEÇÃO 5 — CONTROLE DE MODAIS (abrir / fechar)
+  ============================================================= */
+  function abrirModal(id) {
+    document.getElementById(id).classList.add('aberto');
+  }
+
+  function fecharModal(id) {
+    document.getElementById(id).classList.remove('aberto');
+    // Limpa o preview de mídia ao fechar
+    if (id === 'modal-publicacao') {
+      document.getElementById('pub-midia').value = '';
+      document.getElementById('preview-midia').style.display = 'none';
+      indexEdicao = null;
+    }
+  }
+
+  // Fecha modal ao clicar fora dele
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) fecharModal(overlay.id);
+    });
+  });
+
+  /* =============================================================
+     SEÇÃO 6 — PUBLICAÇÕES (JORNAL E FOTOS)
+  ============================================================= */
+
+  // Abre o modal para nova publicação ou edição de existente
+  function abrirModalPublicacao(tipo, idx) {
+    indexEdicao = (idx !== undefined) ? idx : null;
+    document.getElementById('titulo-modal-pub').textContent =
+      (indexEdicao !== null) ? 'Editar Publicação' : 'Nova Publicação';
+
+    if (indexEdicao !== null) {
+      // Preenche o formulário com os dados existentes para edição
+      const item = tipo === 'noticia' ? noticias[idx] : fotos[idx];
+      document.getElementById('pub-tipo').value   = tipo;
+      document.getElementById('pub-titulo').value = item.titulo;
+      if (tipo === 'noticia') document.getElementById('pub-texto').value  = item.texto || '';
+      if (tipo === 'foto')    document.getElementById('pub-legenda').value = item.legenda || '';
+      alterarTipoPub(); // Ajusta os campos visíveis
+    } else {
+      // Limpa o formulário para nova publicação
+      document.getElementById('pub-tipo').value   = 'noticia';
+      document.getElementById('pub-titulo').value = '';
+      document.getElementById('pub-texto').value  = '';
+      document.getElementById('pub-legenda').value = '';
+      alterarTipoPub();
+    }
+
+    abrirModal('modal-publicacao');
+  }
+
+  // Alterna campos visíveis conforme o tipo de publicação
+  function alterarTipoPub() {
+    const tipo = document.getElementById('pub-tipo').value;
+    document.getElementById('bloco-descricao').style.display = tipo === 'noticia' ? 'block' : 'none';
+    document.getElementById('bloco-legenda').style.display   = tipo === 'foto'    ? 'block' : 'none';
+  }
+
+  // Preview da mídia selecionada antes de publicar
+  function previewMidia(input) {
+    const preview = document.getElementById('preview-midia');
+    const arquivo = input.files[0];
+    if (!arquivo) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (arquivo.type.startsWith('video')) {
+        // Para vídeos, substitui a tag img por um elemento de vídeo
+        preview.style.display = 'none';
+      } else {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      }
+    };
+    reader.readAsDataURL(arquivo);
+  }
+
+  // Salva a publicação (nova ou editada)
+  function salvarPublicacao() {
+    const tipo   = document.getElementById('pub-tipo').value;
+    const titulo = document.getElementById('pub-titulo').value.trim();
+    const arquivo = document.getElementById('pub-midia').files[0];
+
+    if (!titulo) { alert('Por favor, preencha o título.'); return; }
+
+    const data = new Date().toLocaleDateString('pt-BR', {
+      day: '2-digit', month: 'long', year: 'numeric'
+    });
+
+    // Lê o arquivo de mídia como base64 para armazenar no localStorage
+    function salvarComMidia(midiaBase64, tipoMidia) {
+      if (tipo === 'noticia') {
+        const item = {
+          titulo,
+          texto:    document.getElementById('pub-texto').value.trim(),
+          data,
+          midia:    midiaBase64 || null,
+          tipoMidia
+        };
+        if (indexEdicao !== null) {
+          noticias[indexEdicao] = item; // edição
+        } else {
+          noticias.unshift(item); // nova notícia vai para o topo
+        }
+        localStorage.setItem('noticias', JSON.stringify(noticias));
+        renderNoticias();
+      } else {
+        const item = {
+          titulo,
+          legenda:  document.getElementById('pub-legenda').value.trim(),
+          data,
+          midia:    midiaBase64 || null,
+          tipoMidia
+        };
+        if (indexEdicao !== null) {
+          fotos[indexEdicao] = item;
+        } else {
+          fotos.unshift(item);
+        }
+        localStorage.setItem('fotos', JSON.stringify(fotos));
+        renderFotos();
+      }
+
+      fecharModal('modal-publicacao');
+    }
+
+    // Se há arquivo, converte para base64; caso contrário, salva sem mídia
+    if (arquivo) {
+      const reader = new FileReader();
+      reader.onload = e => salvarComMidia(e.target.result, arquivo.type);
+      reader.readAsDataURL(arquivo);
+    } else {
+      salvarComMidia(null, null);
+    }
+  }
+
+  // Exclui uma notícia pelo índice
+  function excluirNoticia(idx) {
+    if (!confirm('Excluir esta notícia?')) return;
+    noticias.splice(idx, 1);
+    localStorage.setItem('noticias', JSON.stringify(noticias));
+    renderNoticias();
+  }
+
+  // Exclui uma foto pelo índice
+  function excluirFoto(idx) {
+    if (!confirm('Excluir esta foto?')) return;
+    fotos.splice(idx, 1);
+    localStorage.setItem('fotos', JSON.stringify(fotos));
+    renderFotos();
+  }
+
+  /* =============================================================
+     SEÇÃO 7 — RENDERIZAÇÃO DAS NOTÍCIAS
+  ============================================================= */
+  function renderNoticias() {
+    const lista = document.getElementById('lista-noticias');
+
+    if (noticias.length === 0) {
+      lista.innerHTML = `
+        <div class="vazio" style="grid-column:1/-1">
+          <span>📄</span>
+          <p>Nenhuma notícia publicada ainda.<br>Faça login como editor para começar.</p>
+        </div>`;
+      return;
+    }
+
+    lista.innerHTML = noticias.map((n, i) => `
+      <article class="card">
+        ${n.midia && n.tipoMidia && !n.tipoMidia.startsWith('video')
+          ? `<img src="${n.midia}" alt="${n.titulo}"/>`
+          : n.midia && n.tipoMidia && n.tipoMidia.startsWith('video')
+          ? `<video src="${n.midia}" controls></video>`
+          : ''
+        }
+        <div class="card-corpo">
+          <p class="card-data">${n.data}</p>
+          <h2>${n.titulo}</h2>
+          <p>${n.texto || ''}</p>
+        </div>
+        <!-- Botões de ação — visíveis somente para editores -->
+        <div class="acoes-editor" style="display:${editorLogado ? 'flex' : 'none'}">
+          <button onclick="abrirModalPublicacao('noticia', ${i})">✏️ Editar</button>
+          <button class="excluir" onclick="excluirNoticia(${i})">🗑️ Excluir</button>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  /* =============================================================
+     SEÇÃO 8 — RENDERIZAÇÃO DAS FOTOS
+  ============================================================= */
+  function renderFotos() {
+    const lista = document.getElementById('lista-fotos');
+
+    if (fotos.length === 0) {
+      lista.innerHTML = `
+        <div class="vazio" style="column-span:all">
+          <span>📷</span>
+          <p>Nenhuma foto publicada ainda.</p>
+        </div>`;
+      return;
+    }
+
+    lista.innerHTML = fotos.map((f, i) => `
+      <div class="galeria-item">
+        ${f.midia
+          ? (f.tipoMidia && f.tipoMidia.startsWith('video')
+            ? `<video src="${f.midia}" controls style="width:100%;display:block;"></video>`
+            : `<img src="${f.midia}" alt="${f.titulo}"/>`)
+          : `<div style="background:#1c1c1c;height:200px;display:flex;align-items:center;
+                         justify-content:center;color:#555;font-size:3rem;">📷</div>`
+        }
+        <div class="galeria-legenda">${f.titulo}${f.legenda ? ' — ' + f.legenda : ''}</div>
+        ${editorLogado ? `
+          <div style="display:flex;gap:8px;padding:8px;background:#111;">
+            <button class="btn-secundario" style="flex:1;padding:6px;"
+                    onclick="abrirModalPublicacao('foto', ${i})">✏️ Editar</button>
+            <button class="btn-secundario" style="flex:1;padding:6px;border-color:#e74c3c;color:#e74c3c;"
+                    onclick="excluirFoto(${i})">🗑️ Excluir</button>
+          </div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  /* =============================================================
+     SEÇÃO 9 — CARDÁPIO
+  ============================================================= */
+  function abrirModalCardapio() {
+    abrirModal('modal-cardapio');
+  }
+
+  function salvarCardapio() {
+    const refeicao = document.getElementById('card-refeicao').value;
+    const dia      = document.getElementById('card-dia').value;
+    const itens    = document.getElementById('card-itens').value
+                       .split('\n').map(i => i.trim()).filter(Boolean);
+
+    if (!itens.length) { alert('Adicione pelo menos um item.'); return; }
+
+    // Inicializa a refeição se não existir
+    if (!cardapio[refeicao]) cardapio[refeicao] = {};
+    cardapio[refeicao][dia] = itens;
+
+    localStorage.setItem('cardapio', JSON.stringify(cardapio));
+    renderCardapio();
+    fecharModal('modal-cardapio');
+    document.getElementById('card-itens').value = '';
+  }
+
+  // Renderiza o cardápio das três refeições
+  function renderCardapio() {
+    renderRefeicao('cafe',   'cardapio-cafe');
+    renderRefeicao('almoco', 'cardapio-almoco');
+    renderRefeicao('lanche', 'cardapio-lanche');
+  }
+
+  function renderRefeicao(chave, elementoId) {
+    const el = document.getElementById(elementoId);
+    const dados = cardapio[chave] || {};
+    const dias = Object.keys(dados);
+
+    if (dias.length === 0) {
+      el.innerHTML = `<p style="color:#555;padding:16px 0;">
+        Cardápio não informado. ${editorLogado ? 'Clique em "Editar Cardápio" para adicionar.' : ''}
+      </p>`;
+      return;
+    }
+
+    // Ordem dos dias da semana para exibição
+    const ORDEM = ['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira'];
+    const diasOrdenados = dias.sort((a, b) => ORDEM.indexOf(a) - ORDEM.indexOf(b));
+
+    el.innerHTML = diasOrdenados.map(dia => `
+      <div class="cardapio-dia">
+        <h4>${dia}</h4>
+        <ul>${dados[dia].map(item => `<li>${item}</li>`).join('')}</ul>
+      </div>
+    `).join('');
+  }
+
+  /* =============================================================
+     SEÇÃO 10 — PROGRAMAÇÃO DA SEMANA
+  ============================================================= */
+  function abrirModalProgramacao() {
+    abrirModal('modal-programacao');
+    document.getElementById('prog-titulo').value  = '';
+    document.getElementById('prog-desc').value    = '';
+    document.getElementById('prog-horario').value = '';
+  }
+
+  function salvarEvento() {
+    const titulo  = document.getElementById('prog-titulo').value.trim();
+    const dia     = document.getElementById('prog-dia').value;
+    const horario = document.getElementById('prog-horario').value;
+    const desc    = document.getElementById('prog-desc').value.trim();
+
+    if (!titulo) { alert('Preencha o título do evento.'); return; }
+
+    programacao.push({ titulo, dia, horario, desc });
+    localStorage.setItem('programacao', JSON.stringify(programacao));
+    renderProgramacao();
+    fecharModal('modal-programacao');
+  }
+
+  function excluirEvento(idx) {
+    if (!confirm('Excluir este evento?')) return;
+    programacao.splice(idx, 1);
+    localStorage.setItem('programacao', JSON.stringify(programacao));
+    renderProgramacao();
+  }
+
+  function renderProgramacao() {
+    const lista = document.getElementById('lista-programacao');
+
+    if (programacao.length === 0) {
+      lista.innerHTML = `
+        <div class="vazio" style="grid-column:1/-1">
+          <span>📅</span>
+          <p>Nenhum evento cadastrado ainda.</p>
+        </div>`;
+      return;
+    }
+
+    const ORDEM = ['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+    const ordenado = [...programacao].sort((a, b) =>
+      ORDEM.indexOf(a.dia) - ORDEM.indexOf(b.dia)
+    );
+
+    lista.innerHTML = ordenado.map((ev, i) => `
+      <div class="prog-card">
+        <p class="prog-dia">${ev.dia}</p>
+        <h3>${ev.titulo}</h3>
+        <p>${ev.desc}</p>
+        ${ev.horario ? `<p class="prog-horario">⏰ ${ev.horario}</p>` : ''}
+        ${editorLogado ? `
+          <button class="btn-secundario" style="width:100%;margin-top:12px;padding:8px;
+                  border-color:#e74c3c;color:#e74c3c;"
+                  onclick="excluirEvento(${i})">🗑️ Excluir</button>
+        ` : ''}
+      </div>
+    `).join('');
+  }
+
+  /* =============================================================
+     SEÇÃO 11 — INICIALIZAÇÃO
+     Renderiza todos os dados já salvos quando a página carrega
+  ============================================================= */
+  renderNoticias();
+  renderFotos();
+  renderCardapio();
+  renderProgramacao();
+
+  </script>
+</body>
+</html>
