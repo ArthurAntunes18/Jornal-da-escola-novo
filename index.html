@@ -862,19 +862,19 @@ let programacao = [];
 async function carregarDadosDoFirebase() {
   try {
     // 1. Puxa as Notícias
-    const snapNoticias = await getDocs(query(collection(db, "noticias")));
+    const snapNoticias = await getDocs(collection(db, "noticias"));
     noticias = snapNoticias.docs.map(doc => doc.data());
 
     // 2. Puxa as Fotos
-    const snapFotos = await getDocs(query(collection(db, "fotos")));
+    const snapFotos = await getDocs(collection(db, "fotos"));
     fotos = snapFotos.docs.map(doc => doc.data());
 
     // 3. Puxa o Cardápio
-    const snapCardapio = await getDocs(query(collection(db, "cardapio")));
+    const snapCardapio = await getDocs(collection(db, "cardapio"));
     cardapio = snapCardapio.docs.map(doc => doc.data());
 
     // 4. Puxa a Programação
-    const snapProgramacao = await getDocs(query(collection(db, "programacao")));
+    const snapProgramacao = await getDocs(collection(db, "programacao"));
     programacao = snapProgramacao.docs.map(doc => doc.data());
 
     // CHAME AQUI A SUA FUNÇÃO QUE DESENHA AS NOTÍCIAS NA TELA
@@ -1315,14 +1315,23 @@ carregarDadosDoFirebase();
 
   </script>
   <script type="module">
-  // 1. Importa os módulos necessários (Prontos para o Banco de Dados)
-  import { initializeApp } from "https://gstatic.com";
-  import { getFirestore, collection, addDoc, getDocs, orderBy, query } from "https://gstatic.com";
 
-  // 2. Suas credenciais da foto
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+  // CONFIG FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyA3GuHjxDGtIdnwldbhu8-aeY-MKVYAJ84",
-    authDomain: "://firebaseapp.com",
+    authDomain: "jornal-gsr.firebaseapp.com",
     projectId: "jornal-gsr",
     storageBucket: "jornal-gsr.firebasestorage.app",
     messagingSenderId: "1092908555548",
@@ -1330,19 +1339,25 @@ carregarDadosDoFirebase();
     measurementId: "G-RV8JM9ZSHM"
   };
 
-  // 3. Inicializa o Firebase e o Firestore
+
+  // INICIA FIREBASE
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Expondo o banco para usar em outros scripts se precisar
+
+  // DISPONIBILIZA GLOBALMENTE
   window.db = db;
   window.collection = collection;
   window.addDoc = addDoc;
   window.getDocs = getDocs;
-  window.orderBy = orderBy;
   window.query = query;
+  window.orderBy = orderBy;
+
 
   console.log("Firebase conectado com sucesso!");
+
+
+
 </script>
 </body>
 </html>
