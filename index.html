@@ -958,6 +958,11 @@ window.abrirLogin = function() {
     document.getElementById('fab').style.display = 'none';
     document.querySelectorAll('.acoes-editor').forEach(e => e.style.display = 'none');
     document.querySelectorAll('.so-editor').forEach(e => e.style.display = 'none');
+    // Recarrega todas as abas para remover os botões de edição
+    carregarNoticias();
+    carregarFotos();
+    carregarProgramacao();
+    carregarProposta();
     toast('Você saiu do modo editor.');
     return;
   }
@@ -995,6 +1000,11 @@ window.fazerLogin = function() {
     document.getElementById('fab').style.display = 'flex';
     document.querySelectorAll('.acoes-editor').forEach(e => e.style.display = 'flex');
     document.querySelectorAll('.so-editor').forEach(e => e.style.display = 'block');
+    // Recarrega todas as abas para exibir os botões de edição
+    carregarNoticias();
+    carregarFotos();
+    carregarProgramacao();
+    carregarProposta();
     toast('✅ Logado como editor!');
   } else {
     document.getElementById('erro-login').style.display = 'block';
