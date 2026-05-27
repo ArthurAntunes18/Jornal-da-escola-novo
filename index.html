@@ -1449,7 +1449,7 @@ async function carregarFotos() {
       <div class="galeria-item">
         ${midiaHtml}
         <div class="galeria-legenda">${legTxt}</div>
-        <div class="acoes-editor so-editor" style="display:none;gap:8px;padding:10px 8px;background:#111;position:relative;z-index:2;">
+        <div class="acoes-editor so-editor" style="display:${editorLogado ? 'flex' : 'none'};gap:8px;padding:10px 8px;background:#111;position:relative;z-index:2;">
           <button class="btn-secundario" style="flex:1;padding:8px 6px;"
                   onclick="abrirModalPublicacao('foto','${f.id}')">✏️ Editar</button>
           <button class="btn-secundario" style="flex:1;padding:8px 6px;border-color:#e74c3c;color:#e74c3c;"
