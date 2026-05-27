@@ -381,15 +381,61 @@
     /* ── FOOTER ── */
     footer {
       border-top: 2px solid var(--borda);
-      padding: 24px 48px; text-align: center;
+      padding: 32px 48px; text-align: center;
       color: #444; font-size: 0.85rem; margin-top: 80px;
     }
     footer strong { color: var(--amarelo); }
+
+    /* ── BLOCO DE ENDEREÇO NO RODAPÉ ── */
+    #bloco-endereco {
+      margin-top: 16px;
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
+      font-size: 0.82rem; color: #555;
+    }
+    #bloco-endereco span { display: flex; align-items: center; gap: 6px; }
+    #bloco-endereco a { color: #555; text-decoration: none; }
+    #bloco-endereco a:hover { color: var(--amarelo); }
+    #btn-editar-endereco {
+      margin-top: 14px; background: transparent;
+      border: 1px solid #333; color: #555;
+      padding: 6px 14px; border-radius: 6px; cursor: pointer;
+      font-size: 0.78rem; display: none; transition: all .2s;
+    }
+    #btn-editar-endereco:hover { border-color: var(--amarelo); color: var(--amarelo); }
+
+    /* ── ABA MAIS / PROPOSTA PEDAGÓGICA ── */
+    .proposta-bloco {
+      background: var(--card);
+      border: 1px solid var(--borda);
+      border-radius: 12px;
+      padding: 36px 40px;
+      max-width: 860px;
+      margin: 0 auto 32px;
+    }
+    .proposta-bloco h3 {
+      color: var(--amarelo); font-size: 1.15rem;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin: 0 0 16px;
+    }
+    .proposta-bloco p {
+      color: #aaa; line-height: 1.8; margin: 0;
+      white-space: pre-wrap;
+    }
+    .proposta-bloco.vazio p { color: #444; font-style: italic; }
+    .proposta-vazio-msg {
+      text-align: center; padding: 60px 24px;
+      color: #333; font-size: 1.1rem;
+    }
+    #btn-editar-proposta {
+      display: block; margin: 0 auto 40px;
+      padding: 10px 28px;
+    }
 
     @media (max-width: 600px) {
       header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
       main   { padding: 24px 16px; }
       .modal { padding: 24px 20px; }
+      .proposta-bloco { padding: 24px 20px; }
     }
   </style>
 </head>
@@ -423,6 +469,7 @@
   <button onclick="trocarAba('fotos', this)">📷 Fotos</button>
   <button onclick="trocarAba('cardapio', this)">🍽️ Cardápio</button>
   <button onclick="trocarAba('programacao', this)">📅 Programação</button>
+  <button onclick="trocarAba('mais', this)">☰ Mais</button>
 </nav>
 
 <main>
@@ -485,10 +532,21 @@
     </button>
   </section>
 
+  <!-- ─── ABA MAIS ─── -->
+  <section id="aba-mais" class="aba">
+    <h2 style="text-align:center;margin-bottom:32px;">Proposta Pedagógica</h2>
+    <button id="btn-editar-proposta" class="btn-secundario so-editor"
+            onclick="abrirModalProposta()"
+            style="display:none;margin:0 auto 40px;padding:10px 28px;">✏️ Editar Proposta</button>
+    <div id="lista-proposta"></div>
+  </section>
+
 </main>
 
 <footer>
   <strong>O Estudante</strong> — Jornal CEPI Gomes de Souza Ramos &bull; 2026
+  <div id="bloco-endereco"></div>
+  <button id="btn-editar-endereco" class="so-editor" onclick="abrirModalEndereco()">✏️ Editar endereço e contato</button>
 </footer>
 
 <!-- LIGHTBOX -->
@@ -625,6 +683,56 @@
   </div>
 </div>
 
+<!-- MODAL ENDEREÇO E CONTATO -->
+<div class="modal-overlay" id="modal-endereco">
+  <div class="modal">
+    <button class="fechar-modal" onclick="fecharModal('modal-endereco')">✕</button>
+    <h2>Endereço e Contato</h2>
+
+    <label>Endereço</label>
+    <input type="text" id="end-rua" placeholder="Ex: Rua das Flores, 123 — Bairro Centro"/>
+
+    <label>Cidade / Estado</label>
+    <input type="text" id="end-cidade" placeholder="Ex: Goiânia — GO"/>
+
+    <label>Telefone</label>
+    <input type="text" id="end-telefone" placeholder="Ex: (62) 3222-0000"/>
+
+    <label>E-mail</label>
+    <input type="email" id="end-email" placeholder="Ex: escola@edu.go.gov.br"/>
+
+    <label>Site ou Instagram (opcional)</label>
+    <input type="text" id="end-site" placeholder="Ex: @escola ou https://..."/>
+
+    <div class="modal-btns">
+      <button class="btn-primario" onclick="salvarEndereco()">Salvar</button>
+      <button class="btn-secundario" onclick="fecharModal('modal-endereco')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROPOSTA PEDAGÓGICA -->
+<div class="modal-overlay" id="modal-proposta">
+  <div class="modal" style="max-width:720px">
+    <button class="fechar-modal" onclick="fecharModal('modal-proposta')">✕</button>
+    <h2>Proposta Pedagógica</h2>
+    <p style="color:#666;font-size:.85rem;margin-bottom:16px;">
+      Adicione quantos blocos quiser (missão, visão, valores, metodologia, etc.)
+    </p>
+
+    <label>Título do bloco</label>
+    <input type="text" id="prop-titulo" placeholder="Ex: Missão"/>
+
+    <label>Conteúdo</label>
+    <textarea id="prop-texto" placeholder="Descreva aqui..." style="min-height:140px;"></textarea>
+
+    <div class="modal-btns">
+      <button class="btn-primario" onclick="salvarBloco()">Adicionar Bloco</button>
+      <button class="btn-secundario" onclick="fecharModal('modal-proposta')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ================================================================
      SUPABASE + CLOUDINARY
@@ -690,6 +798,15 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     desc text,
     criado_em bigint DEFAULT extract(epoch from now()) * 1000
   );
+
+  CREATE TABLE configuracoes (
+    id text PRIMARY KEY,   -- ex: 'endereco', 'proposta'
+    dados jsonb DEFAULT '{}'
+  );
+
+  ALTER TABLE configuracoes ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "leitura_publica" ON configuracoes FOR SELECT USING (true);
+  CREATE POLICY "escrita_publica" ON configuracoes FOR ALL USING (true);
 
   -- Habilitar leitura pública (Row Level Security)
   ALTER TABLE noticias ENABLE ROW LEVEL SECURITY;
@@ -1360,13 +1477,124 @@ async function init() {
       carregarNoticias(),
       carregarFotos(),
       carregarCardapio(),
-      carregarProgramacao()
+      carregarProgramacao(),
+      carregarEndereco(),
+      carregarProposta()
     ]);
   } catch (err) {
     console.error('Erro ao inicializar:', err);
   } finally {
     esconderLoading();
   }
+}
+
+/* ================================================================
+   ENDEREÇO E CONTATO — SUPABASE (tabela: configuracoes)
+   Chave: 'endereco'
+================================================================ */
+window.abrirModalEndereco = function() {
+  supabase.from('configuracoes').select('*').eq('id', 'endereco').single()
+    .then(({ data }) => {
+      const d = (data && data.dados) || {};
+      document.getElementById('end-rua').value      = d.rua      || '';
+      document.getElementById('end-cidade').value   = d.cidade   || '';
+      document.getElementById('end-telefone').value = d.telefone || '';
+      document.getElementById('end-email').value    = d.email    || '';
+      document.getElementById('end-site').value     = d.site     || '';
+      window.abrirModal('modal-endereco');
+    });
+};
+
+window.salvarEndereco = async function() {
+  const dados = {
+    rua:      document.getElementById('end-rua').value.trim(),
+    cidade:   document.getElementById('end-cidade').value.trim(),
+    telefone: document.getElementById('end-telefone').value.trim(),
+    email:    document.getElementById('end-email').value.trim(),
+    site:     document.getElementById('end-site').value.trim()
+  };
+  const { error } = await supabase.from('configuracoes').upsert({ id: 'endereco', dados });
+  if (error) { alert('Erro ao salvar: ' + error.message); return; }
+  toast('✅ Endereço salvo!');
+  window.fecharModal('modal-endereco');
+  await carregarEndereco();
+};
+
+async function carregarEndereco() {
+  const { data } = await supabase.from('configuracoes').select('*').eq('id', 'endereco').single();
+  const d = (data && data.dados) || {};
+  const bloco = document.getElementById('bloco-endereco');
+  const partes = [];
+  if (d.rua)      partes.push(`<span>📍 ${escapeHtml(d.rua)}${d.cidade ? ', ' + escapeHtml(d.cidade) : ''}</span>`);
+  if (d.telefone) partes.push(`<span>📞 <a href="tel:${escapeHtml(d.telefone)}">${escapeHtml(d.telefone)}</a></span>`);
+  if (d.email)    partes.push(`<span>✉️ <a href="mailto:${escapeHtml(d.email)}">${escapeHtml(d.email)}</a></span>`);
+  if (d.site) {
+    const href = d.site.startsWith('http') ? d.site : `https://instagram.com/${d.site.replace('@','')}`;
+    partes.push(`<span>🌐 <a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(d.site)}</a></span>`);
+  }
+  bloco.innerHTML = partes.join('');
+}
+
+/* ================================================================
+   PROPOSTA PEDAGÓGICA — SUPABASE (tabela: configuracoes)
+   Chave: 'proposta'  → dados = [ {titulo, texto}, ... ]
+================================================================ */
+window.abrirModalProposta = function() {
+  document.getElementById('prop-titulo').value = '';
+  document.getElementById('prop-texto').value  = '';
+  window.abrirModal('modal-proposta');
+};
+
+window.salvarBloco = async function() {
+  const titulo = document.getElementById('prop-titulo').value.trim();
+  const texto  = document.getElementById('prop-texto').value.trim();
+  if (!titulo || !texto) { alert('Preencha o título e o conteúdo.'); return; }
+
+  const { data: existing } = await supabase.from('configuracoes').select('*').eq('id', 'proposta').single();
+  const blocos = (existing && existing.dados) ? existing.dados : [];
+  blocos.push({ titulo, texto, id: Date.now() });
+
+  const { error } = await supabase.from('configuracoes').upsert({ id: 'proposta', dados: blocos });
+  if (error) { alert('Erro ao salvar: ' + error.message); return; }
+
+  toast('✅ Bloco adicionado!');
+  document.getElementById('prop-titulo').value = '';
+  document.getElementById('prop-texto').value  = '';
+  await carregarProposta();
+};
+
+window.excluirBloco = async function(blocoId) {
+  if (!confirm('Excluir este bloco?')) return;
+  const { data: existing } = await supabase.from('configuracoes').select('*').eq('id', 'proposta').single();
+  const blocos = ((existing && existing.dados) || []).filter(b => b.id !== blocoId);
+  const { error } = await supabase.from('configuracoes').upsert({ id: 'proposta', dados: blocos });
+  if (error) { alert('Erro: ' + error.message); return; }
+  toast('🗑️ Bloco excluído.');
+  await carregarProposta();
+};
+
+async function carregarProposta() {
+  const lista = document.getElementById('lista-proposta');
+  const { data } = await supabase.from('configuracoes').select('*').eq('id', 'proposta').single();
+  const blocos = (data && data.dados) ? data.dados : [];
+
+  if (blocos.length === 0) {
+    lista.innerHTML = `<div class="proposta-vazio-msg">
+      <p style="font-size:2rem;margin-bottom:12px;">📄</p>
+      <p>A proposta pedagógica ainda não foi preenchida.</p>
+      ${editorLogado ? '<p style="margin-top:8px;color:#555;font-size:.85rem;">Use o botão acima para adicionar blocos.</p>' : ''}
+    </div>`;
+    return;
+  }
+
+  lista.innerHTML = blocos.map(b => `
+    <div class="proposta-bloco">
+      <h3>${escapeHtml(b.titulo)}</h3>
+      <p>${escapeHtml(b.texto)}</p>
+      ${editorLogado ? `
+        <button class="btn-secundario" style="margin-top:20px;padding:6px 16px;border-color:#e74c3c;color:#e74c3c;"
+                onclick="excluirBloco(${b.id})">🗑️ Remover bloco</button>` : ''}
+    </div>`).join('');
 }
 
 init();
