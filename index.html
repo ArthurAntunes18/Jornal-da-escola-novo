@@ -277,6 +277,49 @@
     }
     .galeria-item:hover .galeria-legenda { opacity: 1; }
 
+    /* ── LIGHTBOX ── */
+    #lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.96);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000;
+      animation: lbFadeIn .2s ease;
+    }
+    #lightbox.aberto { display: flex; }
+    @keyframes lbFadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+    #lightbox-img {
+      max-width: 92vw; max-height: 88vh;
+      object-fit: contain;
+      border: 2px solid var(--amarelo);
+      box-shadow: 0 0 80px rgba(245,196,0,.2);
+      display: block;
+    }
+    #lightbox-video {
+      max-width: 92vw; max-height: 88vh;
+      border: 2px solid var(--amarelo);
+      display: none;
+    }
+    #lightbox-legenda {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,.9));
+      color: var(--branco); text-align: center;
+      padding: 32px 24px 20px;
+      font-size: 1rem; letter-spacing: .5px;
+      pointer-events: none;
+    }
+    #lightbox-fechar {
+      position: fixed; top: 20px; right: 24px;
+      background: transparent; border: none;
+      color: #888; font-size: 2.2rem; line-height: 1;
+      cursor: pointer; z-index: 10001;
+      transition: color .2s, transform .2s;
+    }
+    #lightbox-fechar:hover { color: var(--amarelo); transform: scale(1.2); }
+
+    /* imagens clicáveis mostram cursor de zoom */
+    .card img, .galeria-item img { cursor: zoom-in; }
+
     /* ── CARDÁPIO ── */
     .cardapio-grupo { margin-bottom: 48px; }
     .cardapio-grupo h3 {
@@ -430,6 +473,14 @@
 <footer>
   <strong>O Estudante</strong> — Jornal CEPI Gomes de Souza Ramos &bull; 2026
 </footer>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button id="lightbox-fechar" onclick="fecharLightbox()" title="Fechar (Esc)">✕</button>
+  <img id="lightbox-img" src="" alt=""/>
+  <video id="lightbox-video" controls></video>
+  <div id="lightbox-legenda"></div>
+</div>
 
 <button id="fab" title="Nova Publicação" onclick="abrirModalPublicacao()">+</button>
 
@@ -663,6 +714,49 @@ function toast(msg, dur = 3000) {
 function esconderLoading() {
   document.getElementById('loading-overlay').style.display = 'none';
 }
+
+/* ================================================================
+   LIGHTBOX — TELA CHEIA AO CLICAR NA IMAGEM
+================================================================ */
+window.abrirLightbox = function(url, legenda, isVideo) {
+  const lb      = document.getElementById('lightbox');
+  const img     = document.getElementById('lightbox-img');
+  const video   = document.getElementById('lightbox-video');
+  const leg     = document.getElementById('lightbox-legenda');
+
+  leg.textContent = legenda || '';
+
+  if (isVideo) {
+    img.style.display   = 'none';
+    video.style.display = 'block';
+    video.src = url;
+    video.play();
+  } else {
+    video.style.display = 'none';
+    video.src = '';
+    img.style.display   = 'block';
+    img.src = url;
+  }
+  lb.classList.add('aberto');
+  document.body.style.overflow = 'hidden';
+};
+
+window.fecharLightbox = function() {
+  const lb    = document.getElementById('lightbox');
+  const video = document.getElementById('lightbox-video');
+  video.pause();
+  video.src = '';
+  lb.classList.remove('aberto');
+  document.body.style.overflow = '';
+};
+
+// Fechar clicando no fundo ou pressionando Esc
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) window.fecharLightbox();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') window.fecharLightbox();
+});
 
 /* ================================================================
    NAVEGAÇÃO DE ABAS
@@ -987,10 +1081,14 @@ async function carregarNoticias() {
   }
 
   lista.innerHTML = rows.map(n => {
+    const isVideo = n.tipo_midia && n.tipo_midia.startsWith('video');
+    const legenda = escapeHtml(n.titulo);
     const midiaHtml = n.midia_url
-      ? (n.tipo_midia && n.tipo_midia.startsWith('video')
+      ? (isVideo
           ? `<video src="${escapeHtml(n.midia_url)}" controls></video>`
-          : `<img src="${escapeHtml(n.midia_url)}" alt="${escapeHtml(n.titulo)}"/>`)
+          : `<img src="${escapeHtml(n.midia_url)}" alt="${legenda}"
+               onclick="abrirLightbox('${escapeHtml(n.midia_url)}','${legenda}',false)"
+               style="cursor:zoom-in"/>`)
       : '';
     return `
       <article class="card">
@@ -1036,15 +1134,20 @@ async function carregarFotos() {
   }
 
   lista.innerHTML = rows.map(f => {
+    const isVideo = f.tipo_midia && f.tipo_midia.startsWith('video');
+    const legTxt  = escapeHtml(f.titulo) + (f.legenda ? ' — ' + escapeHtml(f.legenda) : '');
     const midiaHtml = f.midia_url
-      ? (f.tipo_midia && f.tipo_midia.startsWith('video')
-          ? `<video src="${escapeHtml(f.midia_url)}" controls style="width:100%;display:block;"></video>`
-          : `<img src="${escapeHtml(f.midia_url)}" alt="${escapeHtml(f.titulo)}"/>`)
+      ? (isVideo
+          ? `<video src="${escapeHtml(f.midia_url)}" controls style="width:100%;display:block;cursor:pointer;"
+               onclick="abrirLightbox('${escapeHtml(f.midia_url)}','${legTxt}',true)"></video>`
+          : `<img src="${escapeHtml(f.midia_url)}" alt="${escapeHtml(f.titulo)}"
+               onclick="abrirLightbox('${escapeHtml(f.midia_url)}','${legTxt}',false)"
+               style="cursor:zoom-in"/>`)
       : `<div style="background:#1c1c1c;height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:3rem;">📷</div>`;
     return `
       <div class="galeria-item">
         ${midiaHtml}
-        <div class="galeria-legenda">${escapeHtml(f.titulo)}${f.legenda ? ' — ' + escapeHtml(f.legenda) : ''}</div>
+        <div class="galeria-legenda">${legTxt}</div>
         ${editorLogado ? `
           <div style="display:flex;gap:8px;padding:8px;background:#111;">
             <button class="btn-secundario" style="flex:1;padding:6px;"
