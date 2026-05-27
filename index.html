@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="google-site-verification" content="p7FBHCQec61ValE7b2kRsz-hJXZnf72aEdy4tPYO5z4" />
   <link rel="apple-touch-icon" sizes="180x180" href="imagensj/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="imagensj/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="imagensj/favicon-16x16.png">
@@ -386,6 +387,18 @@
     }
     footer strong { color: var(--amarelo); }
 
+    #btn-instagram {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 16px;
+      padding: 10px 22px;
+      background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+      color: #fff; font-weight: 700; font-size: 0.88rem;
+      letter-spacing: 1px; text-transform: uppercase;
+      text-decoration: none; border-radius: 8px;
+      transition: opacity .2s, transform .2s;
+    }
+    #btn-instagram:hover { opacity: .85; transform: translateY(-2px); }
+
     /* ── BLOCO DE ENDEREÇO NO RODAPÉ ── */
     #bloco-endereco {
       margin-top: 16px;
@@ -395,13 +408,6 @@
     #bloco-endereco span { display: flex; align-items: center; gap: 6px; }
     #bloco-endereco a { color: #555; text-decoration: none; }
     #bloco-endereco a:hover { color: var(--amarelo); }
-    #btn-editar-endereco {
-      margin-top: 14px; background: transparent;
-      border: 1px solid #333; color: #555;
-      padding: 6px 14px; border-radius: 6px; cursor: pointer;
-      font-size: 0.78rem; display: none; transition: all .2s;
-    }
-    #btn-editar-endereco:hover { border-color: var(--amarelo); color: var(--amarelo); }
 
     /* ── ABA MAIS / PROPOSTA PEDAGÓGICA ── */
     .proposta-bloco {
@@ -437,6 +443,58 @@
       .modal { padding: 24px 20px; }
       .proposta-bloco { padding: 24px 20px; }
     }
+
+    /* ── TEXTO EXPANSÍVEL (ler mais / ler menos) ── */
+    .texto-colapsavel {
+      overflow: hidden;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .texto-colapsavel.recolhido {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      overflow: hidden;
+      white-space: normal;
+    }
+    .btn-ler-mais {
+      background: transparent;
+      border: none;
+      color: var(--amarelo);
+      font-family: var(--fonte-corpo);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 0 0;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-top: 4px;
+      transition: opacity .2s;
+    }
+    .btn-ler-mais:hover { opacity: .75; }
+
+    /* Garante quebra de linha nos cards de programação */
+    .prog-card p,
+    .prog-card h3 {
+      word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    /* Garante quebra de linha nos cards de notícias */
+    .card-corpo p,
+    .card-corpo h2 {
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+
+    /* Garante quebra de linha na proposta */
+    .proposta-bloco p {
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
   </style>
 </head>
 <body>
@@ -456,6 +514,7 @@
     <h1>📰 O Estudante</h1>
     <!-- ↓ COLOQUE O NOME DA SUA ESCOLA AQUI ↓ -->
     <span>CEPI Gomes de Souza Ramos — Jornalismo Estudantil</span>
+
   </div>
   <div style="display:flex;align-items:center;gap:16px;">
     <span id="status-editor">✏️ Modo Editor</span>
@@ -545,8 +604,19 @@
 
 <footer>
   <strong>O Estudante</strong> — Jornal CEPI Gomes de Souza Ramos &bull; 2026
+  <br>
+  <strong>Endereço</strong> — Av. Planalto s/n - Vila Jaiara, Anápolis - GO, 75064-720
+  <br>
+  <strong>Contato</strong> — 62 3315-1440
   <div id="bloco-endereco"></div>
-  <button id="btn-editar-endereco" class="so-editor" onclick="abrirModalEndereco()">✏️ Editar endereço e contato</button>
+  <br>
+  <a id="btn-instagram" href="https://instagram.com/cepigomesdesouzaramos" target="_blank" rel="noopener">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608C4.516 2.497 5.783 2.226 7.15 2.163 8.416 2.105 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.333.014 7.053.072 5.197.157 3.355.673 2.014 2.014.673 3.355.157 5.197.072 7.053.014 8.333 0 8.741 0 12c0 3.259.014 3.667.072 4.947.085 1.856.601 3.698 1.942 5.039 1.341 1.341 3.183 1.857 5.039 1.942C8.333 23.986 8.741 24 12 24s3.667-.014 4.947-.072c1.856-.085 3.698-.601 5.039-1.942 1.341-1.341 1.857-3.183 1.942-5.039C23.986 15.667 24 15.259 24 12s-.014-3.667-.072-4.947c-.085-1.856-.601-3.698-1.942-5.039C20.645.673 18.803.157 16.947.072 15.667.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324A6.162 6.162 0 0 0 12 5.838zm0 10.162a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+    </svg>
+    Instagram da escola
+  </a>
+  
 </footer>
 
 <!-- LIGHTBOX -->
@@ -683,41 +753,13 @@
   </div>
 </div>
 
-<!-- MODAL ENDEREÇO E CONTATO -->
-<div class="modal-overlay" id="modal-endereco">
-  <div class="modal">
-    <button class="fechar-modal" onclick="fecharModal('modal-endereco')">✕</button>
-    <h2>Endereço e Contato</h2>
-
-    <label>Endereço</label>
-    <input type="text" id="end-rua" placeholder="Ex: Rua das Flores, 123 — Bairro Centro"/>
-
-    <label>Cidade / Estado</label>
-    <input type="text" id="end-cidade" placeholder="Ex: Goiânia — GO"/>
-
-    <label>Telefone</label>
-    <input type="text" id="end-telefone" placeholder="Ex: (62) 3222-0000"/>
-
-    <label>E-mail</label>
-    <input type="email" id="end-email" placeholder="Ex: escola@edu.go.gov.br"/>
-
-    <label>Site ou Instagram (opcional)</label>
-    <input type="text" id="end-site" placeholder="Ex: @escola ou https://..."/>
-
-    <div class="modal-btns">
-      <button class="btn-primario" onclick="salvarEndereco()">Salvar</button>
-      <button class="btn-secundario" onclick="fecharModal('modal-endereco')">Cancelar</button>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL PROPOSTA PEDAGÓGICA -->
 <div class="modal-overlay" id="modal-proposta">
   <div class="modal" style="max-width:720px">
     <button class="fechar-modal" onclick="fecharModal('modal-proposta')">✕</button>
-    <h2>Proposta Pedagógica</h2>
+    <h2 id="titulo-modal-proposta">Novo Bloco</h2>
     <p style="color:#666;font-size:.85rem;margin-bottom:16px;">
-      Adicione quantos blocos quiser (missão, visão, valores, metodologia, etc.)
+      Adicione blocos como: Missão, Visão, Valores, Metodologia, etc.
     </p>
 
     <label>Título do bloco</label>
@@ -727,8 +769,8 @@
     <textarea id="prop-texto" placeholder="Descreva aqui..." style="min-height:140px;"></textarea>
 
     <div class="modal-btns">
-      <button class="btn-primario" onclick="salvarBloco()">Adicionar Bloco</button>
-      <button class="btn-secundario" onclick="fecharModal('modal-proposta')">Fechar</button>
+      <button class="btn-primario" id="btn-salvar-bloco" onclick="salvarBloco()">Adicionar Bloco</button>
+      <button class="btn-secundario" onclick="fecharModal('modal-proposta')">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1077,6 +1119,7 @@ async function uploadArquivo(arquivo, pasta) {
    MODAL DE PUBLICAÇÃO — ABRIR
 ================================================================ */
 window.abrirModalPublicacao = function(tipo, docId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem publicar ou editar conteúdo.'); return; }
   indexEdicao = (docId !== undefined) ? { tipo, id: docId } : null;
   document.getElementById('titulo-modal-pub').textContent =
     indexEdicao ? 'Editar Publicação' : 'Nova Publicação';
@@ -1105,6 +1148,7 @@ window.abrirModalPublicacao = function(tipo, docId) {
    SALVAR PUBLICAÇÃO (NOTÍCIA OU FOTO) — SUPABASE
 ================================================================ */
 window.salvarPublicacao = async function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem publicar conteúdo.'); return; }
   const tipo   = document.getElementById('pub-tipo').value;
   const titulo = document.getElementById('pub-titulo').value.trim();
   const arquivo = document.getElementById('pub-midia').files[0];
@@ -1182,6 +1226,7 @@ window.salvarPublicacao = async function() {
    EXCLUIR NOTÍCIA — SUPABASE
 ================================================================ */
 window.excluirNoticia = async function(docId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir notícias.'); return; }
   if (!confirm('Excluir esta notícia?')) return;
   try {
     const { error } = await supabase.from('materiais').delete().eq('id', docId);
@@ -1197,6 +1242,7 @@ window.excluirNoticia = async function(docId) {
    EXCLUIR FOTO — SUPABASE
 ================================================================ */
 window.excluirFoto = async function(docId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir fotos.'); return; }
   if (!confirm('Excluir esta foto?')) return;
   try {
     const { error } = await supabase.from('materiais').delete().eq('id', docId);
@@ -1214,6 +1260,18 @@ window.excluirFoto = async function(docId) {
 function escapeHtml(str) {
   return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+/* ── Limite de caracteres para exibir "ler mais" ── */
+const LIMITE_TEXTO = 220;
+
+/* Expande / recolhe texto nos cards */
+window.toggleTexto = function(btn, id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const recolhido = el.classList.contains('recolhido');
+  el.classList.toggle('recolhido', !recolhido);
+  btn.textContent = recolhido ? '▲ Ler menos' : '▼ Ler mais';
+};
 
 async function carregarNoticias() {
   const lista = document.getElementById('lista-noticias');
@@ -1243,13 +1301,19 @@ async function carregarNoticias() {
                onclick="abrirLightbox('${escapeHtml(n.midia_url)}','${legenda}',false)"
                style="cursor:zoom-in"/>`)
       : '';
+    const textoId = 'texto-noticia-' + n.id;
+    const textoLongo = (n.texto || '').length > LIMITE_TEXTO;
+    const textoHtml = textoLongo
+      ? `<p id="${textoId}" class="texto-colapsavel recolhido">${escapeHtml(n.texto)}</p>
+         <button class="btn-ler-mais" onclick="toggleTexto(this,'${textoId}')">▼ Ler mais</button>`
+      : `<p class="texto-colapsavel">${escapeHtml(n.texto)}</p>`;
     return `
       <article class="card">
         ${midiaHtml}
         <div class="card-corpo">
           <p class="card-data">${escapeHtml(n.data)}</p>
           <h2>${escapeHtml(n.titulo)}</h2>
-          <p>${escapeHtml(n.texto)}</p>
+          ${textoHtml}
         </div>
         <div class="acoes-editor" style="display:${editorLogado ? 'flex' : 'none'}">
           <button onclick="abrirModalPublicacao('noticia','${n.id}')">✏️ Editar</button>
@@ -1321,9 +1385,13 @@ supabase
 /* ================================================================
    CARDÁPIO — SUPABASE
 ================================================================ */
-window.abrirModalCardapio = function() { window.abrirModal('modal-cardapio'); };
+window.abrirModalCardapio = function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem editar o cardápio.'); return; }
+  window.abrirModal('modal-cardapio');
+};
 
 window.salvarCardapio = async function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem salvar o cardápio.'); return; }
   const refeicao = document.getElementById('card-refeicao').value;
   const dia      = document.getElementById('card-dia').value;
   const itens    = document.getElementById('card-itens').value
@@ -1390,6 +1458,7 @@ function renderRefeicao(chave, elementoId) {
    PROGRAMAÇÃO — SUPABASE
 ================================================================ */
 window.abrirModalProgramacao = function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem adicionar eventos.'); return; }
   window.abrirModal('modal-programacao');
   document.getElementById('prog-titulo').value  = '';
   document.getElementById('prog-desc').value    = '';
@@ -1397,6 +1466,7 @@ window.abrirModalProgramacao = function() {
 };
 
 window.salvarEvento = async function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem salvar eventos.'); return; }
   const titulo  = document.getElementById('prog-titulo').value.trim();
   const dia     = document.getElementById('prog-dia').value;
   const horario = document.getElementById('prog-horario').value;
@@ -1416,6 +1486,7 @@ window.salvarEvento = async function() {
 };
 
 window.excluirEvento = async function(docId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir eventos.'); return; }
   if (!confirm('Excluir este evento?')) return;
   try {
     const { error } = await supabase.from('programacao').delete().eq('id', docId);
@@ -1448,18 +1519,25 @@ async function carregarProgramacao() {
   const ORDEM = ['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
   const ordenados = [...rows].sort((a, b) => ORDEM.indexOf(a.dia) - ORDEM.indexOf(b.dia));
 
-  lista.innerHTML = ordenados.map(ev => `
+  lista.innerHTML = ordenados.map(ev => {
+    const descId = 'desc-prog-' + ev.id;
+    const descLonga = (ev.desc || '').length > LIMITE_TEXTO;
+    const descHtml = descLonga
+      ? `<p id="${descId}" class="texto-colapsavel recolhido">${escapeHtml(ev.desc)}</p>
+         <button class="btn-ler-mais" onclick="toggleTexto(this,'${descId}')">▼ Ler mais</button>`
+      : `<p class="texto-colapsavel">${escapeHtml(ev.desc)}</p>`;
+    return `
     <div class="prog-card">
       <p class="prog-dia">${escapeHtml(ev.dia)}</p>
       <h3>${escapeHtml(ev.titulo)}</h3>
-      <p>${escapeHtml(ev.desc)}</p>
+      ${descHtml}
       ${ev.horario ? `<p class="prog-horario">⏰ ${escapeHtml(ev.horario)}</p>` : ''}
       ${editorLogado ? `
         <button class="btn-secundario" style="width:100%;margin-top:12px;padding:8px;
                 border-color:#e74c3c;color:#e74c3c;"
                 onclick="excluirEvento('${ev.id}')">🗑️ Excluir</button>
       ` : ''}
-    </div>`).join('');
+    </div>`}).join('');
 }
 
 // Realtime para programação
@@ -1478,7 +1556,6 @@ async function init() {
       carregarFotos(),
       carregarCardapio(),
       carregarProgramacao(),
-      carregarEndereco(),
       carregarProposta()
     ]);
   } catch (err) {
@@ -1489,85 +1566,66 @@ async function init() {
 }
 
 /* ================================================================
-   ENDEREÇO E CONTATO — SUPABASE (tabela: configuracoes)
-   Chave: 'endereco'
-================================================================ */
-window.abrirModalEndereco = function() {
-  supabase.from('configuracoes').select('*').eq('id', 'endereco').single()
-    .then(({ data }) => {
-      const d = (data && data.dados) || {};
-      document.getElementById('end-rua').value      = d.rua      || '';
-      document.getElementById('end-cidade').value   = d.cidade   || '';
-      document.getElementById('end-telefone').value = d.telefone || '';
-      document.getElementById('end-email').value    = d.email    || '';
-      document.getElementById('end-site').value     = d.site     || '';
-      window.abrirModal('modal-endereco');
-    });
-};
-
-window.salvarEndereco = async function() {
-  const dados = {
-    rua:      document.getElementById('end-rua').value.trim(),
-    cidade:   document.getElementById('end-cidade').value.trim(),
-    telefone: document.getElementById('end-telefone').value.trim(),
-    email:    document.getElementById('end-email').value.trim(),
-    site:     document.getElementById('end-site').value.trim()
-  };
-  const { error } = await supabase.from('configuracoes').upsert({ id: 'endereco', dados });
-  if (error) { alert('Erro ao salvar: ' + error.message); return; }
-  toast('✅ Endereço salvo!');
-  window.fecharModal('modal-endereco');
-  await carregarEndereco();
-};
-
-async function carregarEndereco() {
-  const { data } = await supabase.from('configuracoes').select('*').eq('id', 'endereco').single();
-  const d = (data && data.dados) || {};
-  const bloco = document.getElementById('bloco-endereco');
-  const partes = [];
-  if (d.rua)      partes.push(`<span>📍 ${escapeHtml(d.rua)}${d.cidade ? ', ' + escapeHtml(d.cidade) : ''}</span>`);
-  if (d.telefone) partes.push(`<span>📞 <a href="tel:${escapeHtml(d.telefone)}">${escapeHtml(d.telefone)}</a></span>`);
-  if (d.email)    partes.push(`<span>✉️ <a href="mailto:${escapeHtml(d.email)}">${escapeHtml(d.email)}</a></span>`);
-  if (d.site) {
-    const href = d.site.startsWith('http') ? d.site : `https://instagram.com/${d.site.replace('@','')}`;
-    partes.push(`<span>🌐 <a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(d.site)}</a></span>`);
-  }
-  bloco.innerHTML = partes.join('');
-}
-
 /* ================================================================
    PROPOSTA PEDAGÓGICA — SUPABASE (tabela: configuracoes)
    Chave: 'proposta'  → dados = [ {titulo, texto}, ... ]
 ================================================================ */
-window.abrirModalProposta = function() {
-  document.getElementById('prop-titulo').value = '';
-  document.getElementById('prop-texto').value  = '';
-  window.abrirModal('modal-proposta');
+let blocoEditandoId = null;
+
+window.abrirModalProposta = function(blocoId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem editar a proposta pedagógica.'); return; }
+  blocoEditandoId = (blocoId !== undefined) ? blocoId : null;
+
+  if (blocoEditandoId !== null) {
+    supabase.from('materiais').select('*').eq('chave', 'proposta').single().then(({ data }) => {
+      const blocos = (data && data.dados) || [];
+      const bloco  = blocos.find(b => b.id === blocoEditandoId);
+      if (!bloco) return;
+      document.getElementById('prop-titulo').value = bloco.titulo;
+      document.getElementById('prop-texto').value  = bloco.texto;
+      document.getElementById('titulo-modal-proposta').textContent = 'Editar Bloco';
+      document.getElementById('btn-salvar-bloco').textContent = 'Salvar Alterações';
+      window.abrirModal('modal-proposta');
+    });
+  } else {
+    document.getElementById('prop-titulo').value = '';
+    document.getElementById('prop-texto').value  = '';
+    document.getElementById('titulo-modal-proposta').textContent = 'Novo Bloco';
+    document.getElementById('btn-salvar-bloco').textContent = 'Adicionar Bloco';
+    window.abrirModal('modal-proposta');
+  }
 };
 
 window.salvarBloco = async function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem salvar blocos.'); return; }
   const titulo = document.getElementById('prop-titulo').value.trim();
   const texto  = document.getElementById('prop-texto').value.trim();
   if (!titulo || !texto) { alert('Preencha o título e o conteúdo.'); return; }
 
-  const { data: existing } = await supabase.from('configuracoes').select('*').eq('id', 'proposta').single();
-  const blocos = (existing && existing.dados) ? existing.dados : [];
-  blocos.push({ titulo, texto, id: Date.now() });
+  const { data: existing } = await supabase.from('materiais').select('*').eq('chave', 'proposta').single();
+  let blocos = (existing && existing.dados) ? existing.dados : [];
 
-  const { error } = await supabase.from('configuracoes').upsert({ id: 'proposta', dados: blocos });
+  if (blocoEditandoId !== null) {
+    blocos = blocos.map(b => b.id === blocoEditandoId ? { ...b, titulo, texto } : b);
+  } else {
+    blocos.push({ titulo, texto, id: Date.now() });
+  }
+
+  const { error } = await supabase.from('materiais').upsert({ chave: 'proposta', dados: blocos }, { onConflict: 'chave' });
   if (error) { alert('Erro ao salvar: ' + error.message); return; }
 
-  toast('✅ Bloco adicionado!');
-  document.getElementById('prop-titulo').value = '';
-  document.getElementById('prop-texto').value  = '';
+  toast(blocoEditandoId !== null ? '✅ Bloco atualizado!' : '✅ Bloco adicionado!');
+  blocoEditandoId = null;
+  window.fecharModal('modal-proposta');
   await carregarProposta();
 };
 
 window.excluirBloco = async function(blocoId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir blocos.'); return; }
   if (!confirm('Excluir este bloco?')) return;
-  const { data: existing } = await supabase.from('configuracoes').select('*').eq('id', 'proposta').single();
+  const { data: existing } = await supabase.from('materiais').select('*').eq('chave', 'proposta').single();
   const blocos = ((existing && existing.dados) || []).filter(b => b.id !== blocoId);
-  const { error } = await supabase.from('configuracoes').upsert({ id: 'proposta', dados: blocos });
+  const { error } = await supabase.from('materiais').upsert({ chave: 'proposta', dados: blocos }, { onConflict: 'chave' });
   if (error) { alert('Erro: ' + error.message); return; }
   toast('🗑️ Bloco excluído.');
   await carregarProposta();
@@ -1575,7 +1633,7 @@ window.excluirBloco = async function(blocoId) {
 
 async function carregarProposta() {
   const lista = document.getElementById('lista-proposta');
-  const { data } = await supabase.from('configuracoes').select('*').eq('id', 'proposta').single();
+  const { data } = await supabase.from('materiais').select('*').eq('chave', 'proposta').single();
   const blocos = (data && data.dados) ? data.dados : [];
 
   if (blocos.length === 0) {
@@ -1587,17 +1645,29 @@ async function carregarProposta() {
     return;
   }
 
-  lista.innerHTML = blocos.map(b => `
+  lista.innerHTML = blocos.map(b => {
+    const textoId = 'texto-prop-' + b.id;
+    const textoLongo = (b.texto || '').length > LIMITE_TEXTO;
+    const textoHtml = textoLongo
+      ? `<p id="${textoId}" class="texto-colapsavel recolhido">${escapeHtml(b.texto)}</p>
+         <button class="btn-ler-mais" onclick="toggleTexto(this,'${textoId}')">▼ Ler mais</button>`
+      : `<p class="texto-colapsavel">${escapeHtml(b.texto)}</p>`;
+    return `
     <div class="proposta-bloco">
       <h3>${escapeHtml(b.titulo)}</h3>
-      <p>${escapeHtml(b.texto)}</p>
+      ${textoHtml}
       ${editorLogado ? `
-        <button class="btn-secundario" style="margin-top:20px;padding:6px 16px;border-color:#e74c3c;color:#e74c3c;"
-                onclick="excluirBloco(${b.id})">🗑️ Remover bloco</button>` : ''}
-    </div>`).join('');
+        <div style="display:flex;gap:8px;margin-top:20px;">
+          <button class="btn-secundario" style="padding:6px 16px;"
+                  onclick="abrirModalProposta(${b.id})">✏️ Editar</button>
+          <button class="btn-secundario" style="padding:6px 16px;border-color:#e74c3c;color:#e74c3c;"
+                  onclick="excluirBloco(${b.id})">🗑️ Remover</button>
+        </div>` : ''}
+    </div>`}).join('');
 }
 
 init();
+
 
 </script>
 </body>
