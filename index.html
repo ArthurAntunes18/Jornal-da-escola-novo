@@ -999,7 +999,7 @@ window.fazerLogin = function() {
     document.getElementById('status-editor').style.display = 'inline';
     document.getElementById('fab').style.display = 'flex';
     document.querySelectorAll('.acoes-editor').forEach(e => e.style.display = 'flex');
-    document.querySelectorAll('.so-editor').forEach(e => e.style.display = 'block');
+    document.querySelectorAll('.so-editor:not(.acoes-editor)').forEach(e => e.style.display = 'block');
     // Recarrega todas as abas para exibir os botões de edição
     carregarNoticias();
     carregarFotos();
@@ -1666,13 +1666,12 @@ async function carregarProposta() {
     <div class="proposta-bloco">
       <h3>${escapeHtml(b.titulo)}</h3>
       ${textoHtml}
-      ${editorLogado ? `
-        <div style="display:flex;gap:8px;margin-top:20px;">
-          <button class="btn-secundario" style="padding:6px 16px;"
-                  onclick="abrirModalProposta(${b.id})">✏️ Editar</button>
-          <button class="btn-secundario" style="padding:6px 16px;border-color:#e74c3c;color:#e74c3c;"
-                  onclick="excluirBloco(${b.id})">🗑️ Remover</button>
-        </div>` : ''}
+      <div class="acoes-editor so-editor" style="display:none;gap:8px;margin-top:20px;">
+        <button class="btn-secundario" style="padding:6px 16px;"
+                onclick="abrirModalProposta(${b.id})">✏️ Editar</button>
+        <button class="btn-secundario" style="padding:6px 16px;border-color:#e74c3c;color:#e74c3c;"
+                onclick="excluirBloco(${b.id})">🗑️ Remover</button>
+      </div>
     </div>`}).join('');
 }
 
