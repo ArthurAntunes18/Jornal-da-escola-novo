@@ -280,7 +280,11 @@
     @media (max-width: 1000px) { .galeria { columns: 2; } }
     .galeria-item {
       break-inside: avoid; margin-bottom: 16px;
-      position: relative; overflow: hidden;
+      position: relative;
+    }
+    .galeria-item > img,
+    .galeria-item > video {
+      overflow: hidden;
     }
     .galeria-item img, .galeria-item video {
       width: 100%; display: block; transition: transform .3s;
@@ -795,6 +799,9 @@ const SUPABASE_ANON_KEY = 'sb_publishable_RZlPWL1xp_5ufL6xck7V7A_LNpf28q3'
 // Encontre em: Cloudinary → Settings → Upload → Upload presets (crie um "Unsigned")
 const CLOUDINARY_CLOUD_NAME = 'dhjm92hcs'   // ex: 'minha-escola'
 const CLOUDINARY_UPLOAD_PRESET = 'jornal_preset'    // ex: 'jornal_escolar'
+// Para exclusão de imagens: Cloudinary → Settings → API Keys
+const CLOUDINARY_API_KEY    = '972156728474352'
+const CLOUDINARY_API_SECRET = 'eVQmWhfh_f0OIf6SNPyh7CY0bts'
 
 /* ================================================================
    INICIALIZAÇÃO DO SUPABASE
@@ -1142,10 +1149,41 @@ async function uploadArquivo(arquivo, pasta) {
   });
 }
 
-/* Exclui imagem/vídeo do Cloudinary via API (requer assinatura; opcional) */
-// Nota: exclusão direta do cliente requer configuração extra no Cloudinary.
-// Por padrão, os arquivos ficam no Cloudinary mesmo após excluir do banco.
-// Para excluir, configure um backend ou use o painel do Cloudinary.
+/* ================================================================
+   EXCLUIR ARQUIVO DO CLOUDINARY (com assinatura SHA-1)
+================================================================ */
+async function excluirDoCloudinary(publicId, tipoMidia) {
+  if (!CLOUDINARY_API_KEY || CLOUDINARY_API_KEY === 'COLOQUE_SUA_API_KEY_AQUI') return;
+  try {
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const resourceType = (tipoMidia && tipoMidia.startsWith('video')) ? 'video' : 'image';
+    const strToSign = `public_id=${publicId}&timestamp=${timestamp}${CLOUDINARY_API_SECRET}`;
+
+    // Gera assinatura SHA-1 via Web Crypto API
+    const encoder = new TextEncoder();
+    const data = encoder.encode(strToSign);
+    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    const formData = new FormData();
+    formData.append('public_id', publicId);
+    formData.append('timestamp', timestamp);
+    formData.append('api_key', CLOUDINARY_API_KEY);
+    formData.append('signature', signature);
+
+    const resp = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/destroy`,
+      { method: 'POST', body: formData }
+    );
+    const result = await resp.json();
+    if (result.result !== 'ok') {
+      console.warn('Cloudinary não removeu o arquivo:', result);
+    }
+  } catch (e) {
+    console.warn('Erro ao excluir do Cloudinary:', e.message);
+  }
+}
 
 /* ================================================================
    MODAL DE PUBLICAÇÃO — ABRIR
@@ -1282,12 +1320,18 @@ window.excluirNoticia = async function(docId) {
 ================================================================ */
 window.excluirFoto = async function(docId) {
   if (!editorLogado) { alert('⛔ Apenas editores podem excluir fotos.'); return; }
-  if (!confirm('Excluir esta foto?')) return;
+  if (!confirm('Excluir esta foto/vídeo?')) return;
   try {
+    // Busca o public_id antes de deletar para remover do Cloudinary também
+    const { data: registro } = await supabase.from('materiais').select('midia_public_id,tipo_midia,titulo').eq('id', docId).single();
     const { error } = await supabase.from('materiais').delete().eq('id', docId);
     if (error) throw error;
+    // Remove do Cloudinary se tiver public_id
+    if (registro && registro.midia_public_id) {
+      await excluirDoCloudinary(registro.midia_public_id, registro.tipo_midia);
+    }
     toast('🗑️ Foto excluída.');
-    registrarAtividade('excluiu', `Foto ID: ${docId}`);
+    registrarAtividade('excluiu', `Foto: "${registro?.titulo || docId}"`);
     await carregarFotos();
   } catch (err) {
     alert('Erro ao excluir: ' + err.message);
@@ -1405,13 +1449,12 @@ async function carregarFotos() {
       <div class="galeria-item">
         ${midiaHtml}
         <div class="galeria-legenda">${legTxt}</div>
-        ${editorLogado ? `
-          <div style="display:flex;gap:8px;padding:8px;background:#111;">
-            <button class="btn-secundario" style="flex:1;padding:6px;"
-                    onclick="abrirModalPublicacao('foto','${f.id}')">✏️ Editar</button>
-            <button class="btn-secundario" style="flex:1;padding:6px;border-color:#e74c3c;color:#e74c3c;"
-                    onclick="excluirFoto('${f.id}')">🗑️ Excluir</button>
-          </div>` : ''}
+        <div class="acoes-editor so-editor" style="display:none;gap:8px;padding:10px 8px;background:#111;position:relative;z-index:2;">
+          <button class="btn-secundario" style="flex:1;padding:8px 6px;"
+                  onclick="abrirModalPublicacao('foto','${f.id}')">✏️ Editar</button>
+          <button class="btn-secundario" style="flex:1;padding:8px 6px;border-color:#e74c3c;color:#e74c3c;"
+                  onclick="excluirFoto('${f.id}')">🗑️ Excluir</button>
+        </div>
       </div>`;
   }).join('');
 }
@@ -1620,7 +1663,7 @@ window.abrirModalProposta = function(blocoId) {
   blocoEditandoId = (blocoId !== undefined) ? blocoId : null;
 
   if (blocoEditandoId !== null) {
-    supabase.from('materiais').select('*').eq('chave', 'proposta').single().then(({ data }) => {
+    supabase.from('materiais').select('*').eq('chave', 'proposta').not('dados','is',null).single().then(({ data }) => {
       const blocos = (data && data.dados) || [];
       const bloco  = blocos.find(b => b.id === blocoEditandoId);
       if (!bloco) return;
@@ -1645,7 +1688,7 @@ window.salvarBloco = async function() {
   const texto  = document.getElementById('prop-texto').value.trim();
   if (!titulo || !texto) { alert('Preencha o título e o conteúdo.'); return; }
 
-  const { data: existing } = await supabase.from('materiais').select('*').eq('chave', 'proposta').single();
+  const { data: existing } = await supabase.from('materiais').select('*').eq('chave', 'proposta').not('dados','is',null).single();
   let blocos = (existing && existing.dados) ? existing.dados : [];
 
   if (blocoEditandoId !== null) {
@@ -1668,7 +1711,7 @@ window.salvarBloco = async function() {
 window.excluirBloco = async function(blocoId) {
   if (!editorLogado) { alert('⛔ Apenas editores podem excluir blocos.'); return; }
   if (!confirm('Excluir este bloco?')) return;
-  const { data: existing } = await supabase.from('materiais').select('*').eq('chave', 'proposta').single();
+  const { data: existing } = await supabase.from('materiais').select('*').eq('chave', 'proposta').not('dados','is',null).single();
   const blocos = ((existing && existing.dados) || []).filter(b => b.id !== blocoId);
   const { error } = await supabase.from('materiais').upsert({ chave: 'proposta', dados: blocos }, { onConflict: 'chave' });
   if (error) { alert('Erro: ' + error.message); return; }
@@ -1679,7 +1722,7 @@ window.excluirBloco = async function(blocoId) {
 
 async function carregarProposta() {
   const lista = document.getElementById('lista-proposta');
-  const { data } = await supabase.from('materiais').select('*').eq('chave', 'proposta').single();
+  const { data } = await supabase.from('materiais').select('*').eq('chave', 'proposta').not('dados','is',null).single();
   const blocos = (data && data.dados) ? data.dados : [];
 
   if (blocos.length === 0) {
