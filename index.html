@@ -256,6 +256,23 @@
     .fechar-modal:hover { color: var(--amarelo); }
     #erro-login { color: #e74c3c; font-size: 0.9rem; margin-top: 8px; display: none; }
 
+    /* ── MOSTRAR/OCULTAR SENHA ── */
+    .campo-senha-wrap {
+      position: relative;
+    }
+    .campo-senha-wrap input {
+      padding-right: 48px;
+    }
+    .btn-ver-senha {
+      position: absolute; top: 50%; right: 12px;
+      transform: translateY(-50%);
+      background: transparent; border: none;
+      color: #666; cursor: pointer; font-size: 1.1rem;
+      line-height: 1; padding: 4px;
+      transition: color .2s;
+    }
+    .btn-ver-senha:hover { color: var(--amarelo); }
+
     /* ── GALERIA ── */
     .galeria { columns: 3; column-gap: 16px; }
     @media (max-width: 700px)  { .galeria { columns: 1; } }
@@ -492,7 +509,10 @@
     <label>Usuário</label>
     <input type="text" id="campo-usuario" placeholder="Digite seu usuário" autocomplete="username"/>
     <label>Senha</label>
-    <input type="password" id="campo-senha" placeholder="Digite sua senha" autocomplete="current-password"/>
+    <div class="campo-senha-wrap">
+      <input type="password" id="campo-senha" placeholder="Digite sua senha" autocomplete="current-password"/>
+      <button type="button" class="btn-ver-senha" onclick="alternarSenha()" id="btn-ver-senha" title="Mostrar/ocultar senha">👁️</button>
+    </div>
     <p id="erro-login">❌ Usuário ou senha incorretos.</p>
     <div class="modal-btns">
       <button class="btn-primario" onclick="fazerLogin()">Entrar</button>
@@ -785,6 +805,20 @@ window.abrirLogin = function() {
   abrirModal('modal-login');
 };
 
+window.alternarSenha = function() {
+  const campo = document.getElementById('campo-senha');
+  const btn   = document.getElementById('btn-ver-senha');
+  if (campo.type === 'password') {
+    campo.type = 'text';
+    btn.textContent = '🙈';
+    btn.title = 'Ocultar senha';
+  } else {
+    campo.type = 'password';
+    btn.textContent = '👁️';
+    btn.title = 'Mostrar senha';
+  }
+};
+
 window.fazerLogin = function() {
   const usuario = document.getElementById('campo-usuario').value.trim();
   const senha   = document.getElementById('campo-senha').value;
@@ -794,6 +828,8 @@ window.fazerLogin = function() {
     fecharModal('modal-login');
     document.getElementById('campo-usuario').value = '';
     document.getElementById('campo-senha').value   = '';
+    document.getElementById('campo-senha').type    = 'password';
+    document.getElementById('btn-ver-senha').textContent = '👁️';
     document.getElementById('erro-login').style.display = 'none';
     document.getElementById('btn-login-topo').textContent = 'Sair do Editor';
     document.getElementById('status-editor').style.display = 'inline';
