@@ -285,6 +285,7 @@
     .galeria-item > img,
     .galeria-item > video {
       overflow: hidden;
+      position: relative;
     }
     .galeria-item img, .galeria-item video {
       width: 100%; display: block; transition: transform .3s;
@@ -415,7 +416,7 @@
 
     /* ── ABA MAIS / PROPOSTA PEDAGÓGICA ── */
     .proposta-bloco {
-      background: var(--card);
+      background: var(--cinza);
       border: 1px solid var(--borda);
       border-radius: 12px;
       padding: 36px 40px;
@@ -820,7 +821,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     midia_url text,
     midia_public_id text,
     tipo_midia text,
-    criado_em bigint DEFAULT extract(epoch from now()) * 1000
+    created_at bigint DEFAULT extract(epoch from now()) * 1000
   );
 
   CREATE TABLE fotos (
@@ -831,7 +832,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     midia_url text,
     midia_public_id text,
     tipo_midia text,
-    criado_em bigint DEFAULT extract(epoch from now()) * 1000
+    created_at bigint DEFAULT extract(epoch from now()) * 1000
   );
 
   CREATE TABLE cardapio (
@@ -845,7 +846,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     dia text,
     horario text,
     desc text,
-    criado_em bigint DEFAULT extract(epoch from now()) * 1000
+    created_at bigint DEFAULT extract(epoch from now()) * 1000
   );
 
   CREATE TABLE configuracoes (
@@ -855,6 +856,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
   -- ── TABELA DE LOG DE ATIVIDADES DOS EDITORES ──
   -- Execute este SQL no Supabase para registrar as ações dos editores:
+  ALTER TABLE materiais ADD COLUMN IF NOT EXISTS tipo text;
   ALTER TABLE materiais ADD COLUMN IF NOT EXISTS login_editor text;
   ALTER TABLE materiais ADD COLUMN IF NOT EXISTS acao_editor text;
   ALTER TABLE materiais ADD COLUMN IF NOT EXISTS detalhes_editor text;
@@ -998,7 +1000,7 @@ window.abrirLogin = function() {
     toast('Você saiu do modo editor.');
     return;
   }
-  abrirModal('modal-login');
+  window.abrirModal('modal-login');
 };
 
 window.alternarSenha = function() {
@@ -1023,7 +1025,7 @@ window.fazerLogin = function() {
     editorLogado = true;
     nomeEditor = ok.usuario;
     registrarAtividade('login', 'Entrou no modo editor');
-    fecharModal('modal-login');
+    window.fecharModal('modal-login');
     document.getElementById('campo-usuario').value = '';
     document.getElementById('campo-senha').value   = '';
     document.getElementById('campo-senha').type    = 'password';
@@ -1195,8 +1197,8 @@ window.abrirModalPublicacao = function(tipo, docId) {
     indexEdicao ? 'Editar Publicação' : 'Nova Publicação';
 
   if (indexEdicao) {
-    const tabela = tipo === 'noticia' ? 'materiais' : 'materiais';
-    supabase.from(tabela).select('*').eq('id', docId).single().then(({ data: d, error }) => {
+    const tabela = tipo === 'noticia' ? 'materiais' : 'materiais'; // ambos na mesma tabela, filtrados por tipo
+    supabase.from(tabela).select('*').eq('id', docId).eq('tipo', tipo).single().then(({ data: d, error }) => {
       if (error || !d) return;
       document.getElementById('pub-tipo').value   = tipo;
       document.getElementById('pub-titulo').value = d.titulo || '';
@@ -1249,6 +1251,7 @@ window.salvarPublicacao = async function() {
     const tabela = 'materiais';
 
     const item = {
+      tipo: tipo,
       titulo,
       data,
       midia_url:       midiaUrl,
@@ -1362,6 +1365,7 @@ async function carregarNoticias() {
   const { data: rows, error } = await supabase
     .from('materiais')
     .select('*')
+    .eq('tipo', 'noticia')
     .order('created_at', { ascending: false });
 
   if (error) { console.error(error); return; }
@@ -1421,6 +1425,7 @@ async function carregarFotos() {
   const { data: rows, error } = await supabase
     .from('materiais')
     .select('*')
+    .eq('tipo', 'foto')
     .order('created_at', { ascending: false });
 
   if (error) { console.error(error); return; }
@@ -1677,7 +1682,6 @@ async function init() {
   }
 }
 
-/* ================================================================
 /* ================================================================
    PROPOSTA PEDAGÓGICA — SUPABASE (tabela: configuracoes)
    Chave: 'proposta'  → dados = [ {titulo, texto}, ... ]
