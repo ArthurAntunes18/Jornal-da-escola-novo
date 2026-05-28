@@ -1504,6 +1504,24 @@ window.salvarCardapio = async function() {
   }
 };
 
+window.excluirDiaCardapio = async function(refeicao, dia) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir itens do cardápio.'); return; }
+  if (!confirm(`Excluir o cardápio de ${dia} (${refeicao})?`)) return;
+  try {
+    const { data: existing } = await supabase.from('cardapio').select('*').eq('id', refeicao).single();
+    const dados = (existing && existing.dados) ? { ...existing.dados } : {};
+    delete dados[dia];
+    const { error } = await supabase.from('cardapio').upsert({ id: refeicao, dados });
+    if (error) throw error;
+    cardapio[refeicao] = dados;
+    renderCardapio();
+    registrarAtividade('excluiu cardápio', `${refeicao} — ${dia}`);
+    toast('🗑️ Dia removido do cardápio.');
+  } catch (err) {
+    alert('Erro ao excluir: ' + err.message);
+  }
+};
+
 async function carregarCardapio() {
   const { data: rows, error } = await supabase.from('cardapio').select('*');
   if (error) { console.error(error); return; }
@@ -1533,7 +1551,15 @@ function renderRefeicao(chave, elementoId) {
   const ordenados = dias.sort((a, b) => ORDEM.indexOf(a) - ORDEM.indexOf(b));
   el.innerHTML = ordenados.map(dia => `
     <div class="cardapio-dia">
-      <h4>${escapeHtml(dia)}</h4>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <h4 style="margin:0;">${escapeHtml(dia)}</h4>
+        ${editorLogado ? `<button
+          onclick="excluirDiaCardapio('${chave}','${dia}')"
+          style="background:transparent;border:1px solid #e74c3c;color:#e74c3c;
+                 font-size:0.8rem;padding:3px 10px;cursor:pointer;font-family:inherit;">
+          🗑️ Excluir dia
+        </button>` : ''}
+      </div>
       <ul>${dados[dia].map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
     </div>`).join('');
 }
