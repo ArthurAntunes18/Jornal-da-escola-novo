@@ -12,12 +12,12 @@
 
   <style>
     :root {
-      --preto:    #0a0a0a;
+      --preto:    #1a1a2e;
       --branco:   #f5f5f0;
       --amarelo:  #f5c400;
-      --cinza:    #1c1c1c;
-      --cinza2:   #2e2e2e;
-      --borda:    #333;
+      --cinza:    #eef0f4;
+      --cinza2:   #e2e5ec;
+      --borda:    #c8cdd8;
       --fonte-titulo: 'Playfair Display', serif;
       --fonte-corpo:  'Source Sans 3', sans-serif;
     }
@@ -25,8 +25,8 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--preto);
-      color: var(--branco);
+      background: #f0f2f7;
+      color: #1a1a2e;
       font-family: var(--fonte-corpo);
       font-size: 18px;
       line-height: 1.7;
@@ -36,13 +36,13 @@
     /* ── LOADING OVERLAY ── */
     #loading-overlay {
       position: fixed; inset: 0;
-      background: var(--preto);
+      background: #f0f2f7;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       z-index: 9999;
       gap: 16px;
     }
-    #loading-overlay p { color: #888; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
+    #loading-overlay p { color: #666; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
     .spinner {
       width: 48px; height: 48px;
       border: 4px solid var(--borda);
@@ -55,11 +55,12 @@
     /* ── TOAST DE NOTIFICAÇÃO ── */
     #toast {
       position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
-      background: var(--cinza); border: 1px solid var(--amarelo);
-      color: var(--branco); padding: 12px 24px;
+      background: #fff; border: 1px solid var(--amarelo);
+      color: #1a1a2e; padding: 12px 24px;
       font-size: 0.95rem; z-index: 5000;
       opacity: 0; transition: opacity .3s;
       pointer-events: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
     }
     #toast.visivel { opacity: 1; }
 
@@ -80,7 +81,7 @@
 
     /* ── HEADER ── */
     header {
-      background: var(--preto);
+      background: #1a1a2e;
       border-bottom: 4px solid var(--amarelo);
       padding: 24px 48px 16px;
       display: flex; align-items: flex-end;
@@ -110,7 +111,7 @@
 
     /* ── NAV ── */
     nav {
-      background: var(--cinza);
+      background: #ffffff;
       border-bottom: 2px solid var(--borda);
       display: flex; overflow-x: auto;
     }
@@ -118,14 +119,14 @@
       flex: 1; min-width: 140px;
       background: transparent; border: none;
       border-bottom: 4px solid transparent;
-      color: #888; padding: 18px 24px;
+      color: #6b7280; padding: 18px 24px;
       font-family: var(--fonte-corpo); font-size: 1rem;
       font-weight: 700; letter-spacing: 1px;
       text-transform: uppercase; cursor: pointer;
       transition: color .2s, border-color .2s;
     }
-    nav button:hover { color: var(--branco); }
-    nav button.ativa { color: var(--amarelo); border-bottom-color: var(--amarelo); }
+    nav button:hover { color: #1a1a2e; }
+    nav button.ativa { color: #d4a800; border-bottom-color: #d4a800; }
 
     /* ── MAIN ── */
     main { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
@@ -134,7 +135,7 @@
     .secao-titulo {
       font-family: var(--fonte-titulo);
       font-size: clamp(1.8rem, 4vw, 3rem);
-      color: var(--amarelo);
+      color: #1a1a2e;
       border-bottom: 2px solid var(--borda);
       padding-bottom: 12px; margin-bottom: 40px;
     }
@@ -146,9 +147,10 @@
       gap: 32px;
     }
     .card {
-      background: var(--cinza); border: 1px solid var(--borda);
+      background: #ffffff; border: 1px solid var(--borda);
       overflow: hidden; transition: transform .2s, border-color .2s;
       position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
     .card:hover { transform: translateY(-4px); border-color: var(--amarelo); }
     .card img, .card video {
@@ -157,9 +159,9 @@
     .card-corpo { padding: 20px; }
     .card-corpo h2 {
       font-family: var(--fonte-titulo); font-size: 1.4rem;
-      color: var(--branco); margin-bottom: 8px;
+      color: #1a1a2e; margin-bottom: 8px;
     }
-    .card-corpo p { color: #aaa; font-size: 1rem; }
+    .card-corpo p { color: #555; font-size: 1rem; }
     .card-data {
       font-size: 0.8rem; color: var(--amarelo);
       letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
@@ -199,17 +201,17 @@
     }
     .modal-overlay.aberto { display: flex; }
     .modal {
-      background: var(--cinza); border: 2px solid var(--amarelo);
+      background: #ffffff; border: 2px solid var(--amarelo);
       padding: 40px; width: 100%; max-width: 560px;
       max-height: 90vh; overflow-y: auto; position: relative;
     }
     .modal h2 {
       font-family: var(--fonte-titulo); font-size: 1.8rem;
-      color: var(--amarelo); margin-bottom: 24px;
+      color: #1a1a2e; margin-bottom: 24px;
     }
     .modal label {
       display: block; font-size: 0.85rem; letter-spacing: 1px;
-      text-transform: uppercase; color: #888;
+      text-transform: uppercase; color: #555;
       margin-bottom: 6px; margin-top: 16px;
     }
     .modal input[type="text"],
@@ -218,8 +220,8 @@
     .modal input[type="time"],
     .modal textarea,
     .modal select {
-      width: 100%; background: var(--cinza2);
-      border: 1px solid var(--borda); color: var(--branco);
+      width: 100%; background: #f5f6fa;
+      border: 1px solid var(--borda); color: #1a1a2e;
       padding: 12px 16px; font-family: var(--fonte-corpo);
       font-size: 1rem; outline: none; transition: border-color .2s;
     }
@@ -242,7 +244,7 @@
     .btn-primario:hover { opacity: .85; }
     .btn-primario:disabled { opacity: .5; cursor: not-allowed; }
     .btn-secundario {
-      flex: 1; background: transparent; color: var(--branco);
+      flex: 1; background: transparent; color: #1a1a2e;
       border: 1px solid var(--borda); padding: 14px;
       font-family: var(--fonte-corpo); font-size: 1rem;
       cursor: pointer; text-transform: uppercase;
@@ -251,7 +253,7 @@
     .btn-secundario:hover { border-color: var(--amarelo); }
     .fechar-modal {
       position: absolute; top: 16px; right: 20px;
-      background: transparent; border: none; color: #666;
+      background: transparent; border: none; color: #999;
       font-size: 1.5rem; cursor: pointer; line-height: 1;
     }
     .fechar-modal:hover { color: var(--amarelo); }
@@ -351,13 +353,14 @@
       padding-bottom: 8px; border-bottom: 1px solid var(--borda);
     }
     .cardapio-dia {
-      background: var(--cinza); border: 1px solid var(--borda);
+      background: #ffffff; border: 1px solid var(--borda);
       margin-bottom: 12px; padding: 20px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
     }
-    .cardapio-dia h4 { font-weight: 700; color: var(--branco); font-size: 1.1rem; margin-bottom: 8px; }
+    .cardapio-dia h4 { font-weight: 700; color: #1a1a2e; font-size: 1.1rem; margin-bottom: 8px; }
     .cardapio-dia ul { list-style: none; padding: 0; }
     .cardapio-dia ul li {
-      color: #aaa; padding: 4px 0;
+      color: #555; padding: 4px 0;
       border-bottom: 1px solid var(--borda); font-size: 1rem;
     }
     .cardapio-dia ul li:last-child { border: none; }
@@ -369,18 +372,19 @@
       gap: 20px;
     }
     .prog-card {
-      background: var(--cinza); border: 1px solid var(--borda);
+      background: #ffffff; border: 1px solid var(--borda);
       border-top: 4px solid var(--amarelo);
       padding: 20px; transition: transform .2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
     .prog-card:hover { transform: translateY(-3px); }
-    .prog-dia { font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--amarelo); margin-bottom: 8px; }
-    .prog-card h3 { font-family: var(--fonte-titulo); font-size: 1.2rem; color: var(--branco); margin-bottom: 10px; }
-    .prog-card p { color: #aaa; font-size: 0.95rem; }
-    .prog-horario { font-size: 0.85rem; color: var(--amarelo); margin-top: 12px; font-weight: 700; }
+    .prog-dia { font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: #d4a800; margin-bottom: 8px; }
+    .prog-card h3 { font-family: var(--fonte-titulo); font-size: 1.2rem; color: #1a1a2e; margin-bottom: 10px; }
+    .prog-card p { color: #555; font-size: 0.95rem; }
+    .prog-horario { font-size: 0.85rem; color: #d4a800; margin-top: 12px; font-weight: 700; }
 
     /* ── VAZIO ── */
-    .vazio { text-align: center; padding: 80px 20px; color: #444; }
+    .vazio { text-align: center; padding: 80px 20px; color: #aaa; }
     .vazio span { font-size: 3rem; display: block; margin-bottom: 16px; }
     .vazio p { font-size: 1.1rem; }
 
@@ -388,9 +392,9 @@
     footer {
       border-top: 2px solid var(--borda);
       padding: 32px 48px; text-align: center;
-      color: #444; font-size: 0.85rem; margin-top: 80px;
+      color: #888; font-size: 0.85rem; margin-top: 80px;
     }
-    footer strong { color: var(--amarelo); }
+    footer strong { color: #d4a800; }
 
     #btn-instagram {
       display: inline-flex; align-items: center; gap: 8px;
@@ -408,34 +412,35 @@
     #bloco-endereco {
       margin-top: 16px;
       display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
-      font-size: 0.82rem; color: #555;
+      font-size: 0.82rem; color: #888;
     }
     #bloco-endereco span { display: flex; align-items: center; gap: 6px; }
-    #bloco-endereco a { color: #555; text-decoration: none; }
-    #bloco-endereco a:hover { color: var(--amarelo); }
+    #bloco-endereco a { color: #888; text-decoration: none; }
+    #bloco-endereco a:hover { color: #d4a800; }
 
     /* ── ABA MAIS / PROPOSTA PEDAGÓGICA ── */
     .proposta-bloco {
-      background: var(--cinza);
+      background: #ffffff;
       border: 1px solid var(--borda);
       border-radius: 12px;
       padding: 36px 40px;
       max-width: 860px;
       margin: 0 auto 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
     .proposta-bloco h3 {
-      color: var(--amarelo); font-size: 1.15rem;
+      color: #d4a800; font-size: 1.15rem;
       text-transform: uppercase; letter-spacing: 1px;
       margin: 0 0 16px;
     }
     .proposta-bloco p {
-      color: #aaa; line-height: 1.8; margin: 0;
+      color: #444; line-height: 1.8; margin: 0;
       white-space: pre-wrap;
     }
-    .proposta-bloco.vazio p { color: #444; font-style: italic; }
+    .proposta-bloco.vazio p { color: #999; font-style: italic; }
     .proposta-vazio-msg {
       text-align: center; padding: 60px 24px;
-      color: #333; font-size: 1.1rem;
+      color: #aaa; font-size: 1.1rem;
     }
     #btn-editar-proposta {
       display: block; margin: 0 auto 40px;
