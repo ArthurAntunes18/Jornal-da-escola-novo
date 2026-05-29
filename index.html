@@ -447,6 +447,24 @@
       padding: 10px 28px;
     }
 
+    /* ── AVISOS ── */
+    #lista-avisos { display: flex; flex-direction: column; gap: 20px; }
+    .aviso-card {
+      background: #ffffff; border: 1px solid var(--borda);
+      border-left: 5px solid var(--amarelo);
+      padding: 24px 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      transition: transform .2s;
+    }
+    .aviso-card:hover { transform: translateY(-2px); }
+    .aviso-card h3 {
+      font-family: var(--fonte-titulo); font-size: 1.25rem;
+      color: #1a1a2e; margin-bottom: 8px;
+    }
+    .aviso-card p { color: #555; font-size: 1rem; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; }
+    .aviso-data { font-size: 0.8rem; color: var(--amarelo); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+    .aviso-acoes { display: none; gap: 8px; margin-top: 16px; }
+
     @media (max-width: 600px) {
       header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
       main   { padding: 24px 16px; }
@@ -538,6 +556,7 @@
   <button onclick="trocarAba('fotos', this)">📷 Fotos</button>
   <button onclick="trocarAba('cardapio', this)">🍽️ Cardápio</button>
   <button onclick="trocarAba('programacao', this)">📅 Programação</button>
+  <button onclick="trocarAba('avisos', this)">🔔 Avisos</button>
   <button onclick="trocarAba('mais', this)">☰ Mais</button>
 </nav>
 
@@ -598,6 +617,21 @@
     <button class="btn-primario so-editor" onclick="abrirModalProgramacao()"
             style="display:none;max-width:280px;margin-top:32px;">
       + Adicionar Evento
+    </button>
+  </section>
+
+  <!-- ABA AVISOS -->
+  <section id="aba-avisos" class="aba">
+    <h2 class="secao-titulo">Avisos</h2>
+    <div id="lista-avisos">
+      <div class="vazio" style="grid-column:1/-1">
+        <span>🔔</span>
+        <p>Carregando avisos...</p>
+      </div>
+    </div>
+    <button class="btn-primario so-editor" onclick="abrirModalAviso()"
+            style="display:none;max-width:280px;margin-top:32px;">
+      + Novo Aviso
     </button>
   </section>
 
@@ -786,6 +820,22 @@
 </div>
 
 
+<!-- MODAL AVISO -->
+<div class="modal-overlay" id="modal-aviso">
+  <div class="modal">
+    <button class="fechar-modal" onclick="fecharModal('modal-aviso')">✕</button>
+    <h2 id="titulo-modal-aviso">Novo Aviso</h2>
+    <label>Título do Aviso</label>
+    <input type="text" id="aviso-titulo" placeholder="Ex: Reunião de pais amanhã"/>
+    <label>Descrição</label>
+    <textarea id="aviso-texto" placeholder="Detalhes do aviso..." style="min-height:120px;"></textarea>
+    <div class="modal-btns">
+      <button class="btn-primario" id="btn-salvar-aviso" onclick="salvarAviso()">Publicar Aviso</button>
+      <button class="btn-secundario" onclick="fecharModal('modal-aviso')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ================================================================
      SUPABASE + CLOUDINARY
 ================================================================ -->
@@ -854,6 +904,13 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     created_at bigint DEFAULT extract(epoch from now()) * 1000
   );
 
+  CREATE TABLE avisos (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    titulo text NOT NULL,
+    texto text,
+    created_at bigint DEFAULT extract(epoch from now()) * 1000
+  );
+
   CREATE TABLE configuracoes (
     id text PRIMARY KEY,   -- ex: 'endereco', 'proposta'
     dados jsonb DEFAULT '{}'
@@ -892,6 +949,10 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   CREATE POLICY "escrita_publica" ON fotos FOR ALL USING (true);
   CREATE POLICY "escrita_publica" ON cardapio FOR ALL USING (true);
   CREATE POLICY "escrita_publica" ON programacao FOR ALL USING (true);
+
+  ALTER TABLE avisos ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "leitura_publica" ON avisos FOR SELECT USING (true);
+  CREATE POLICY "escrita_publica" ON avisos FOR ALL USING (true);
 */
 
 /* ================================================================
@@ -1678,7 +1739,8 @@ async function init() {
       carregarFotos(),
       carregarCardapio(),
       carregarProgramacao(),
-      carregarProposta()
+      carregarProposta(),
+      carregarAvisos()
     ]);
   } catch (err) {
     console.error('Erro ao inicializar:', err);
@@ -1788,6 +1850,121 @@ async function carregarProposta() {
       </div>
     </div>`}).join('');
 }
+
+/* ================================================================
+   AVISOS — SUPABASE (tabela: avisos)
+================================================================ */
+let avisoEditandoId = null;
+
+window.abrirModalAviso = function(avisoId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem adicionar avisos.'); return; }
+  avisoEditandoId = avisoId || null;
+
+  if (avisoEditandoId) {
+    supabase.from('avisos').select('*').eq('id', avisoEditandoId).single().then(({ data }) => {
+      if (!data) return;
+      document.getElementById('aviso-titulo').value = data.titulo;
+      document.getElementById('aviso-texto').value  = data.texto || '';
+      document.getElementById('titulo-modal-aviso').textContent = 'Editar Aviso';
+      document.getElementById('btn-salvar-aviso').textContent = 'Salvar Alterações';
+      window.abrirModal('modal-aviso');
+    });
+  } else {
+    document.getElementById('aviso-titulo').value = '';
+    document.getElementById('aviso-texto').value  = '';
+    document.getElementById('titulo-modal-aviso').textContent = 'Novo Aviso';
+    document.getElementById('btn-salvar-aviso').textContent = 'Publicar Aviso';
+    window.abrirModal('modal-aviso');
+  }
+};
+
+window.salvarAviso = async function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem salvar avisos.'); return; }
+  const titulo = document.getElementById('aviso-titulo').value.trim();
+  const texto  = document.getElementById('aviso-texto').value.trim();
+  if (!titulo) { alert('Preencha o título do aviso.'); return; }
+
+  try {
+    if (avisoEditandoId) {
+      const { error } = await supabase.from('avisos').update({ titulo, texto }).eq('id', avisoEditandoId);
+      if (error) throw error;
+      toast('✅ Aviso atualizado!');
+      registrarAtividade('editou aviso', `"${titulo}"`);
+    } else {
+      const { error } = await supabase.from('avisos').insert([{ titulo, texto, created_at: Date.now() }]);
+      if (error) throw error;
+      toast('✅ Aviso publicado!');
+      registrarAtividade('adicionou aviso', `"${titulo}"`);
+    }
+    avisoEditandoId = null;
+    window.fecharModal('modal-aviso');
+    await carregarAvisos();
+  } catch (err) {
+    alert('Erro ao salvar aviso: ' + err.message);
+  }
+};
+
+window.excluirAviso = async function(avisoId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir avisos.'); return; }
+  if (!confirm('Excluir este aviso?')) return;
+  try {
+    const { error } = await supabase.from('avisos').delete().eq('id', avisoId);
+    if (error) throw error;
+    toast('🗑️ Aviso excluído.');
+    registrarAtividade('excluiu aviso', `ID: ${avisoId}`);
+    await carregarAvisos();
+  } catch (err) {
+    alert('Erro ao excluir aviso: ' + err.message);
+  }
+};
+
+async function carregarAvisos() {
+  const lista = document.getElementById('lista-avisos');
+  const { data: rows, error } = await supabase
+    .from('avisos')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error(error); return; }
+
+  if (!rows || rows.length === 0) {
+    lista.innerHTML = `
+      <div class="vazio" style="grid-column:1/-1">
+        <span>🔔</span>
+        <p>Nenhum aviso publicado ainda.</p>
+      </div>`;
+    return;
+  }
+
+  lista.innerHTML = rows.map(av => {
+    const textoId = 'texto-aviso-' + av.id;
+    const textoLongo = (av.texto || '').length > LIMITE_TEXTO;
+    const textoHtml = textoLongo
+      ? `<p id="${textoId}" class="texto-colapsavel recolhido">${escapeHtml(av.texto)}</p>
+         <button class="btn-ler-mais" onclick="toggleTexto(this,'${textoId}')">▼ Ler mais</button>`
+      : `<p class="texto-colapsavel">${escapeHtml(av.texto || '')}</p>`;
+    const dataFormatada = av.created_at
+      ? new Date(av.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })
+      : '';
+    return `
+    <div class="aviso-card">
+      ${dataFormatada ? `<p class="aviso-data">${dataFormatada}</p>` : ''}
+      <h3>${escapeHtml(av.titulo)}</h3>
+      ${textoHtml}
+      <div class="aviso-acoes so-editor" style="display:${editorLogado ? 'flex' : 'none'};gap:8px;margin-top:16px;">
+        <button class="btn-secundario" style="padding:6px 16px;" onclick="abrirModalAviso('${av.id}')">✏️ Editar</button>
+        <button class="btn-secundario" style="padding:6px 16px;border-color:#e74c3c;color:#e74c3c;"
+                onclick="excluirAviso('${av.id}')">🗑️ Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Realtime para avisos
+supabase
+  .channel('avisos-realtime')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'avisos' }, () => carregarAvisos())
+  .subscribe();
 
 init();
 
