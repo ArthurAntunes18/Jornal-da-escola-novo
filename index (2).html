@@ -552,7 +552,8 @@
 
 <!-- NAV -->
 <nav>
-  <button class="ativa" onclick="trocarAba('jornal', this)">📰 Jornal</button>
+  <button class="ativa" onclick="trocarAba('jornal', this)">📰 Notícias</button>
+  <button onclick="trocarAba('reportagem', this)">🔍 Reportagem</button>
   <button onclick="trocarAba('fotos', this)">📷 Fotos</button>
   <button onclick="trocarAba('cardapio', this)">🍽️ Cardápio</button>
   <button onclick="trocarAba('programacao', this)">📅 Programação</button>
@@ -571,6 +572,21 @@
         <p>Carregando notícias...</p>
       </div>
     </div>
+  </section>
+
+  <!-- ABA FOTOS -->
+  <section id="aba-reportagem" class="aba">
+    <h2 class="secao-titulo">Reportagens</h2>
+    <div class="grid" id="lista-reportagens">
+      <div class="vazio" style="grid-column:1/-1">
+        <span>🔍</span>
+        <p>Carregando reportagens...</p>
+      </div>
+    </div>
+    <button class="btn-primario so-editor" onclick="abrirModalReportagem()"
+            style="display:none;max-width:280px;margin-top:32px;">
+      + Nova Reportagem
+    </button>
   </section>
 
   <!-- ABA FOTOS -->
@@ -738,6 +754,43 @@
     <div class="modal-btns">
       <button class="btn-primario" id="btn-publicar" onclick="salvarPublicacao()">Publicar</button>
       <button class="btn-secundario" onclick="fecharModal('modal-publicacao')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REPORTAGEM -->
+<div class="modal-overlay" id="modal-reportagem">
+  <div class="modal">
+    <button class="fechar-modal" onclick="fecharModal('modal-reportagem')">✕</button>
+    <h2 id="titulo-modal-rep">Nova Reportagem</h2>
+
+    <label>Título</label>
+    <input type="text" id="rep-titulo" placeholder="Ex: Visita ao museu municipal"/>
+
+    <label>Texto da Reportagem</label>
+    <textarea id="rep-texto" placeholder="Escreva o conteúdo da reportagem aqui..." style="min-height:160px;"></textarea>
+
+    <label>Autor(es)</label>
+    <input type="text" id="rep-autor" placeholder="Ex: Maria Silva, João Souza"/>
+
+    <label class="upload-label">
+      <input type="file" id="rep-midia" accept="image/*,video/*" onchange="previewMidiaRep(this)"/>
+      📎 Clique para enviar imagem ou vídeo (opcional)
+    </label>
+
+    <div id="preview-rep-container" style="margin-top:12px;display:none;">
+      <img id="preview-rep" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;display:none;"/>
+      <video id="preview-rep-video" controls style="max-width:100%;max-height:200px;display:none;"></video>
+    </div>
+
+    <div id="barra-upload-rep-container" style="margin-top:12px;display:none;">
+      <div id="barra-upload-bg"><div id="barra-upload-rep-fill" style="height:100%;background:var(--amarelo);width:0%;transition:width .2s;"></div></div>
+      <p id="barra-upload-rep-label" style="font-size:0.8rem;color:#888;margin-top:4px;">Enviando...</p>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-primario" id="btn-salvar-rep" onclick="salvarReportagem()">Publicar</button>
+      <button class="btn-secundario" onclick="fecharModal('modal-reportagem')">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1066,6 +1119,7 @@ window.abrirLogin = function() {
     // Re-renderizar cardápio e programação para ocultar botões de excluir
     renderCardapio();
     carregarProgramacao();
+    carregarReportagens();
     toast('Você saiu do modo editor.');
     return;
   }
@@ -1108,6 +1162,7 @@ window.fazerLogin = function() {
     // Re-renderizar cardápio e programação para exibir botões de excluir
     renderCardapio();
     carregarProgramacao();
+    carregarReportagens();
     toast('✅ Logado como editor!');
   } else {
     document.getElementById('erro-login').style.display = 'block';
@@ -1543,6 +1598,224 @@ supabase
   .subscribe();
 
 /* ================================================================
+   REPORTAGEM — SUPABASE (tabela: reportagens)
+================================================================ */
+let repEditandoId = null;
+
+window.previewMidiaRep = function(input) {
+  const previewImg   = document.getElementById('preview-rep');
+  const previewVideo = document.getElementById('preview-rep-video');
+  const container    = document.getElementById('preview-rep-container');
+  previewImg.style.display   = 'none';
+  previewVideo.style.display = 'none';
+  container.style.display    = 'none';
+  const arquivo = input.files[0];
+  if (!arquivo) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    container.style.display = 'block';
+    if (arquivo.type.startsWith('video')) {
+      previewVideo.src           = e.target.result;
+      previewVideo.style.display = 'block';
+    } else {
+      previewImg.src           = e.target.result;
+      previewImg.style.display = 'block';
+    }
+  };
+  reader.readAsDataURL(arquivo);
+};
+
+window.abrirModalReportagem = function(repId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem publicar reportagens.'); return; }
+  repEditandoId = repId || null;
+
+  // Reset preview
+  document.getElementById('rep-midia').value = '';
+  document.getElementById('preview-rep').style.display = 'none';
+  document.getElementById('preview-rep-video').style.display = 'none';
+  document.getElementById('preview-rep-container').style.display = 'none';
+  document.getElementById('barra-upload-rep-container').style.display = 'none';
+  document.getElementById('barra-upload-rep-fill').style.width = '0%';
+  document.getElementById('btn-salvar-rep').disabled = false;
+  document.getElementById('btn-salvar-rep').textContent = repEditandoId ? 'Salvar Alterações' : 'Publicar';
+
+  if (repEditandoId) {
+    supabase.from('reportagens').select('*').eq('id', repEditandoId).single().then(({ data }) => {
+      if (!data) return;
+      document.getElementById('rep-titulo').value = data.titulo || '';
+      document.getElementById('rep-texto').value  = data.texto  || '';
+      document.getElementById('rep-autor').value  = data.autor  || '';
+      document.getElementById('titulo-modal-rep').textContent = 'Editar Reportagem';
+      window.abrirModal('modal-reportagem');
+    });
+  } else {
+    document.getElementById('rep-titulo').value = '';
+    document.getElementById('rep-texto').value  = '';
+    document.getElementById('rep-autor').value  = '';
+    document.getElementById('titulo-modal-rep').textContent = 'Nova Reportagem';
+    window.abrirModal('modal-reportagem');
+  }
+};
+
+window.salvarReportagem = async function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem salvar reportagens.'); return; }
+  const titulo  = document.getElementById('rep-titulo').value.trim();
+  const texto   = document.getElementById('rep-texto').value.trim();
+  const autor   = document.getElementById('rep-autor').value.trim();
+  const arquivo = document.getElementById('rep-midia').files[0];
+
+  if (!titulo || !texto) { alert('Preencha o título e o texto da reportagem.'); return; }
+
+  const btn = document.getElementById('btn-salvar-rep');
+  btn.disabled = true;
+  btn.textContent = 'Publicando...';
+
+  try {
+    const data = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+
+    let midiaUrl      = null;
+    let midiaPublicId = null;
+    let tipoMidia     = null;
+
+    if (arquivo) {
+      // Reutiliza upload container da reportagem
+      const barraContainer = document.getElementById('barra-upload-rep-container');
+      const barraFill      = document.getElementById('barra-upload-rep-fill');
+      const barraLabel     = document.getElementById('barra-upload-rep-label');
+      barraContainer.style.display = 'block';
+      barraLabel.textContent = 'Enviando...';
+
+      const resultado = await new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', arquivo);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', 'jornal/reportagens');
+        const xhr = new XMLHttpRequest();
+        const resourceType = arquivo.type.startsWith('video') ? 'video' : 'image';
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`);
+        xhr.upload.onprogress = e => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            barraFill.style.width = pct + '%';
+            barraLabel.textContent = `Enviando... ${pct}%`;
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            barraLabel.textContent = 'Upload concluído!';
+            resolve({ url: res.secure_url, path: res.public_id });
+          } else {
+            reject(new Error(JSON.parse(xhr.responseText).error?.message || 'Erro no upload'));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Falha de rede ao fazer upload.'));
+        xhr.send(formData);
+      });
+      midiaUrl      = resultado.url;
+      midiaPublicId = resultado.path;
+      tipoMidia     = arquivo.type;
+    }
+
+    const item = { titulo, texto, autor, data, created_at: Date.now() };
+    if (midiaUrl) { item.midia_url = midiaUrl; item.midia_public_id = midiaPublicId; item.tipo_midia = tipoMidia; }
+
+    let error;
+    if (repEditandoId) {
+      if (!arquivo) { delete item.midia_url; delete item.midia_public_id; delete item.tipo_midia; }
+      ({ error } = await supabase.from('reportagens').update(item).eq('id', repEditandoId));
+      if (!error) { toast('✅ Reportagem atualizada!'); registrarAtividade('editou reportagem', `"${titulo}"`); }
+    } else {
+      ({ error } = await supabase.from('reportagens').insert([item]));
+      if (!error) { toast('✅ Reportagem publicada!'); registrarAtividade('publicou reportagem', `"${titulo}"`); }
+    }
+
+    if (error) throw error;
+    repEditandoId = null;
+    window.fecharModal('modal-reportagem');
+    await carregarReportagens();
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao salvar reportagem: ' + (err.message || err));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Publicar';
+  }
+};
+
+window.excluirReportagem = async function(docId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir reportagens.'); return; }
+  if (!confirm('Excluir esta reportagem?')) return;
+  try {
+    const { data: reg } = await supabase.from('reportagens').select('midia_public_id,tipo_midia,titulo').eq('id', docId).single();
+    const { error } = await supabase.from('reportagens').delete().eq('id', docId);
+    if (error) throw error;
+    if (reg && reg.midia_public_id) await excluirDoCloudinary(reg.midia_public_id, reg.tipo_midia);
+    toast('🗑️ Reportagem excluída.');
+    registrarAtividade('excluiu reportagem', `"${reg?.titulo || docId}"`);
+    await carregarReportagens();
+  } catch (err) {
+    alert('Erro ao excluir: ' + err.message);
+  }
+};
+
+async function carregarReportagens() {
+  const lista = document.getElementById('lista-reportagens');
+  const { data: rows, error } = await supabase
+    .from('reportagens')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error(error); return; }
+
+  if (!rows || rows.length === 0) {
+    lista.innerHTML = `
+      <div class="vazio" style="grid-column:1/-1">
+        <span>🔍</span>
+        <p>Nenhuma reportagem publicada ainda.<br>Faça login como editor para começar.</p>
+      </div>`;
+    return;
+  }
+
+  lista.innerHTML = rows.map(r => {
+    const isVideo = r.tipo_midia && r.tipo_midia.startsWith('video');
+    const legenda = escapeHtml(r.titulo);
+    const midiaHtml = r.midia_url
+      ? (isVideo
+          ? `<video src="${escapeHtml(r.midia_url)}" controls></video>`
+          : `<img src="${escapeHtml(r.midia_url)}" alt="${legenda}"
+               onclick="abrirLightbox('${escapeHtml(r.midia_url)}','${legenda}',false)"
+               style="cursor:zoom-in"/>`)
+      : '';
+    const textoId = 'texto-rep-' + r.id;
+    const textoLongo = (r.texto || '').length > LIMITE_TEXTO;
+    const textoHtml = textoLongo
+      ? `<p id="${textoId}" class="texto-colapsavel recolhido">${escapeHtml(r.texto)}</p>
+         <button class="btn-ler-mais" onclick="toggleTexto(this,'${textoId}')">▼ Ler mais</button>`
+      : `<p class="texto-colapsavel">${escapeHtml(r.texto)}</p>`;
+    return `
+      <article class="card">
+        ${midiaHtml}
+        <div class="card-corpo">
+          <p class="card-data">${escapeHtml(r.data)}${r.autor ? ' · ✍️ ' + escapeHtml(r.autor) : ''}</p>
+          <h2>${escapeHtml(r.titulo)}</h2>
+          ${textoHtml}
+        </div>
+        <div class="acoes-editor" style="display:${editorLogado ? 'flex' : 'none'}">
+          <button onclick="abrirModalReportagem('${r.id}')">✏️ Editar</button>
+          <button class="excluir" onclick="excluirReportagem('${r.id}')">🗑️ Excluir</button>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+// Realtime para reportagens
+supabase
+  .channel('reportagens-realtime')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'reportagens' }, () => carregarReportagens())
+  .subscribe();
+
+/* ================================================================
    CARDÁPIO — SUPABASE
 ================================================================ */
 window.abrirModalCardapio = function() {
@@ -1742,6 +2015,7 @@ async function init() {
   try {
     await Promise.all([
       carregarNoticias(),
+      carregarReportagens(),
       carregarFotos(),
       carregarCardapio(),
       carregarProgramacao(),
