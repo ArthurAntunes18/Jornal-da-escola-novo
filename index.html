@@ -153,6 +153,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
     .card:hover { transform: translateY(-4px); border-color: var(--amarelo); }
+    .card-destaque { border-top: 4px solid var(--amarelo); }
     .card img, .card video {
       width: 100%; max-height: 220px; object-fit: cover; display: block;
     }
@@ -760,18 +761,56 @@
 
 <!-- MODAL REPORTAGEM -->
 <div class="modal-overlay" id="modal-reportagem">
-  <div class="modal">
+  <div class="modal" style="max-width:620px;">
     <button class="fechar-modal" onclick="fecharModal('modal-reportagem')">✕</button>
     <h2 id="titulo-modal-rep">Nova Reportagem</h2>
 
     <label>Título</label>
     <input type="text" id="rep-titulo" placeholder="Ex: Visita ao museu municipal"/>
 
+    <label>Categoria</label>
+    <select id="rep-categoria">
+      <option value="geral">📰 Geral</option>
+      <option value="esporte">⚽ Esporte</option>
+      <option value="cultura">🎭 Cultura</option>
+      <option value="ciencia">🔬 Ciência</option>
+      <option value="tecnologia">💻 Tecnologia</option>
+      <option value="meio-ambiente">🌱 Meio Ambiente</option>
+      <option value="entrevista">🎤 Entrevista</option>
+      <option value="opiniao">💬 Opinião</option>
+    </select>
+
     <label>Texto da Reportagem</label>
     <textarea id="rep-texto" placeholder="Escreva o conteúdo da reportagem aqui..." style="min-height:160px;"></textarea>
 
     <label>Autor(es)</label>
     <input type="text" id="rep-autor" placeholder="Ex: Maria Silva, João Souza"/>
+
+    <label>Turma / Série</label>
+    <input type="text" id="rep-turma" placeholder="Ex: 3º ano A"/>
+
+    <label>Destacar na página inicial?</label>
+    <select id="rep-destaque">
+      <option value="nao">Não — publicar normalmente</option>
+      <option value="sim">⭐ Sim — exibir como destaque</option>
+    </select>
+
+    <label>Publicar em</label>
+    <div id="rep-destinos" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;background:#f5f6fa;border:1px solid var(--borda);padding:16px;">
+      <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:1rem;margin:0;cursor:pointer;">
+        <input type="checkbox" id="dest-reportagens" value="reportagens" checked style="width:18px;height:18px;accent-color:var(--amarelo);"/>
+        🔍 Aba Reportagens
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:1rem;margin:0;cursor:pointer;">
+        <input type="checkbox" id="dest-jornal" value="jornal" style="width:18px;height:18px;accent-color:var(--amarelo);"/>
+        📰 Aba Notícias (Jornal)
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:1rem;margin:0;cursor:pointer;">
+        <input type="checkbox" id="dest-avisos" value="avisos" style="width:18px;height:18px;accent-color:var(--amarelo);"/>
+        🔔 Aba Avisos
+      </label>
+    </div>
+    <p style="font-size:0.8rem;color:#888;margin-top:6px;">Você pode publicar a reportagem em mais de uma aba ao mesmo tempo.</p>
 
     <label class="upload-label">
       <input type="file" id="rep-midia" accept="image/*,video/*" onchange="previewMidiaRep(this)"/>
@@ -1642,16 +1681,30 @@ window.abrirModalReportagem = function(repId) {
   if (repEditandoId) {
     supabase.from('reportagens').select('*').eq('id', repEditandoId).single().then(({ data }) => {
       if (!data) return;
-      document.getElementById('rep-titulo').value = data.titulo || '';
-      document.getElementById('rep-texto').value  = data.texto  || '';
-      document.getElementById('rep-autor').value  = data.autor  || '';
+      document.getElementById('rep-titulo').value     = data.titulo     || '';
+      document.getElementById('rep-texto').value      = data.texto      || '';
+      document.getElementById('rep-autor').value      = data.autor      || '';
+      document.getElementById('rep-turma').value      = data.turma      || '';
+      document.getElementById('rep-categoria').value  = data.categoria  || 'geral';
+      document.getElementById('rep-destaque').value   = data.destaque   || 'nao';
+      // Destinos
+      const destinos = data.destinos || ['reportagens'];
+      document.getElementById('dest-reportagens').checked = destinos.includes('reportagens');
+      document.getElementById('dest-jornal').checked      = destinos.includes('jornal');
+      document.getElementById('dest-avisos').checked      = destinos.includes('avisos');
       document.getElementById('titulo-modal-rep').textContent = 'Editar Reportagem';
       window.abrirModal('modal-reportagem');
     });
   } else {
-    document.getElementById('rep-titulo').value = '';
-    document.getElementById('rep-texto').value  = '';
-    document.getElementById('rep-autor').value  = '';
+    document.getElementById('rep-titulo').value     = '';
+    document.getElementById('rep-texto').value      = '';
+    document.getElementById('rep-autor').value      = '';
+    document.getElementById('rep-turma').value      = '';
+    document.getElementById('rep-categoria').value  = 'geral';
+    document.getElementById('rep-destaque').value   = 'nao';
+    document.getElementById('dest-reportagens').checked = true;
+    document.getElementById('dest-jornal').checked      = false;
+    document.getElementById('dest-avisos').checked      = false;
     document.getElementById('titulo-modal-rep').textContent = 'Nova Reportagem';
     window.abrirModal('modal-reportagem');
   }
@@ -1659,10 +1712,20 @@ window.abrirModalReportagem = function(repId) {
 
 window.salvarReportagem = async function() {
   if (!editorLogado) { alert('⛔ Apenas editores podem salvar reportagens.'); return; }
-  const titulo  = document.getElementById('rep-titulo').value.trim();
-  const texto   = document.getElementById('rep-texto').value.trim();
-  const autor   = document.getElementById('rep-autor').value.trim();
-  const arquivo = document.getElementById('rep-midia').files[0];
+  const titulo     = document.getElementById('rep-titulo').value.trim();
+  const texto      = document.getElementById('rep-texto').value.trim();
+  const autor      = document.getElementById('rep-autor').value.trim();
+  const turma      = document.getElementById('rep-turma').value.trim();
+  const categoria  = document.getElementById('rep-categoria').value;
+  const destaque   = document.getElementById('rep-destaque').value;
+  const arquivo    = document.getElementById('rep-midia').files[0];
+
+  // Quais abas publicar
+  const destinos = [];
+  if (document.getElementById('dest-reportagens').checked) destinos.push('reportagens');
+  if (document.getElementById('dest-jornal').checked)      destinos.push('jornal');
+  if (document.getElementById('dest-avisos').checked)      destinos.push('avisos');
+  if (destinos.length === 0) { alert('Selecione pelo menos um local para publicar.'); return; }
 
   if (!titulo || !texto) { alert('Preencha o título e o texto da reportagem.'); return; }
 
@@ -1671,14 +1734,13 @@ window.salvarReportagem = async function() {
   btn.textContent = 'Publicando...';
 
   try {
-    const data = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+    const dataFormatada = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
 
     let midiaUrl      = null;
     let midiaPublicId = null;
     let tipoMidia     = null;
 
     if (arquivo) {
-      // Reutiliza upload container da reportagem
       const barraContainer = document.getElementById('barra-upload-rep-container');
       const barraFill      = document.getElementById('barra-upload-rep-fill');
       const barraLabel     = document.getElementById('barra-upload-rep-label');
@@ -1717,23 +1779,36 @@ window.salvarReportagem = async function() {
       tipoMidia     = arquivo.type;
     }
 
-    const item = { titulo, texto, autor, data, created_at: Date.now() };
+    const item = {
+      titulo, texto, autor, turma, categoria, destaque, destinos,
+      data: dataFormatada,
+      created_at: Date.now()
+    };
     if (midiaUrl) { item.midia_url = midiaUrl; item.midia_public_id = midiaPublicId; item.tipo_midia = tipoMidia; }
 
     let error;
     if (repEditandoId) {
       if (!arquivo) { delete item.midia_url; delete item.midia_public_id; delete item.tipo_midia; }
       ({ error } = await supabase.from('reportagens').update(item).eq('id', repEditandoId));
-      if (!error) { toast('✅ Reportagem atualizada!'); registrarAtividade('editou reportagem', `"${titulo}"`); }
+      if (!error) {
+        toast('✅ Reportagem atualizada!');
+        registrarAtividade('editou reportagem', `"${titulo}" → ${destinos.join(', ')}`);
+      }
     } else {
       ({ error } = await supabase.from('reportagens').insert([item]));
-      if (!error) { toast('✅ Reportagem publicada!'); registrarAtividade('publicou reportagem', `"${titulo}"`); }
+      if (!error) {
+        toast(`✅ Reportagem publicada em: ${destinos.join(', ')}!`);
+        registrarAtividade('publicou reportagem', `"${titulo}" → ${destinos.join(', ')}`);
+      }
     }
 
     if (error) throw error;
     repEditandoId = null;
     window.fecharModal('modal-reportagem');
     await carregarReportagens();
+    // Recarregar abas extras se necessário
+    if (destinos.includes('jornal'))  await carregarNoticias();
+    if (destinos.includes('avisos'))  await carregarAvisos();
   } catch (err) {
     console.error(err);
     alert('Erro ao salvar reportagem: ' + (err.message || err));
@@ -1777,6 +1852,12 @@ async function carregarReportagens() {
     return;
   }
 
+  const LABELS_CAT = {
+    geral: '📰 Geral', esporte: '⚽ Esporte', cultura: '🎭 Cultura',
+    ciencia: '🔬 Ciência', tecnologia: '💻 Tecnologia',
+    'meio-ambiente': '🌱 Meio Ambiente', entrevista: '🎤 Entrevista', opiniao: '💬 Opinião'
+  };
+
   lista.innerHTML = rows.map(r => {
     const isVideo = r.tipo_midia && r.tipo_midia.startsWith('video');
     const legenda = escapeHtml(r.titulo);
@@ -1793,11 +1874,31 @@ async function carregarReportagens() {
       ? `<p id="${textoId}" class="texto-colapsavel recolhido">${escapeHtml(r.texto)}</p>
          <button class="btn-ler-mais" onclick="toggleTexto(this,'${textoId}')">▼ Ler mais</button>`
       : `<p class="texto-colapsavel">${escapeHtml(r.texto)}</p>`;
+
+    const catLabel = LABELS_CAT[r.categoria] || '📰 Geral';
+    const destaqueTag = r.destaque === 'sim'
+      ? `<span style="background:var(--amarelo);color:var(--preto);font-size:0.72rem;
+                      font-weight:700;padding:2px 8px;letter-spacing:1px;text-transform:uppercase;
+                      margin-left:8px;">⭐ DESTAQUE</span>` : '';
+    const turmaTag = r.turma
+      ? `<span style="font-size:0.78rem;color:#888;margin-left:6px;">🏫 ${escapeHtml(r.turma)}</span>` : '';
+    const destinosTag = r.destinos && r.destinos.length > 1
+      ? `<span style="font-size:0.72rem;color:#aaa;display:block;margin-top:4px;">
+           Publicado em: ${r.destinos.join(' · ')}</span>` : '';
+
     return `
-      <article class="card">
+      <article class="card${r.destaque === 'sim' ? ' card-destaque' : ''}">
         ${midiaHtml}
         <div class="card-corpo">
-          <p class="card-data">${escapeHtml(r.data)}${r.autor ? ' · ✍️ ' + escapeHtml(r.autor) : ''}</p>
+          <p class="card-data" style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;">
+            <span style="background:#f0f2f7;border:1px solid var(--borda);font-size:0.75rem;
+                         padding:2px 8px;color:#555;">${catLabel}</span>
+            ${destaqueTag}${turmaTag}
+          </p>
+          <p class="card-data" style="margin-top:6px;">
+            ${escapeHtml(r.data)}${r.autor ? ' · ✍️ ' + escapeHtml(r.autor) : ''}
+          </p>
+          ${destinosTag}
           <h2>${escapeHtml(r.titulo)}</h2>
           ${textoHtml}
         </div>
