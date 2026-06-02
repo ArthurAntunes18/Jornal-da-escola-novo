@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <meta name="keywords" content="CEPI, cepi, GSR, gsr, CEPI gsr, cepi gsr, Gomes de Souza Ramos, gomes de souza ramos">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="google-site-verification" content="p7FBHCQec61ValE7b2kRsz-hJXZnf72aEdy4tPYO5z4" />
@@ -808,7 +809,7 @@
     </div>
 
     <div id="barra-upload-rep-container" style="margin-top:12px;display:none;">
-      <div id="barra-upload-bg"><div id="barra-upload-rep-fill" style="height:100%;background:var(--amarelo);width:0%;transition:width .2s;"></div></div>
+      <div id="barra-upload-rep-bg" style="background:var(--borda);height:6px;border-radius:3px;overflow:hidden;"><div id="barra-upload-rep-fill" style="height:100%;background:var(--amarelo);width:0%;transition:width .2s;"></div></div>
       <p id="barra-upload-rep-label" style="font-size:0.8rem;color:#888;margin-top:4px;">Enviando...</p>
     </div>
 
@@ -1052,6 +1053,7 @@ let cardapio     = {};   // cache local do cardápio
 async function registrarAtividade(acao, detalhes = '') {
   try {
     await supabase.from('materiais').insert([{
+      tipo: '_log',
       login_editor: nomeEditor,
       acao_editor:  acao,
       detalhes_editor: detalhes,
@@ -1213,13 +1215,21 @@ window.fecharModal = function(id) {
     document.getElementById('pub-autor').value = '';
     arquivosPub = [];
     renderizarPreviewPub();
-    document.getElementById('preview-midia').style.display = 'none';
-    document.getElementById('preview-midia-video').style.display = 'none';
     document.getElementById('preview-midia-container').style.display = 'none';
     document.getElementById('barra-upload-container').style.display = 'none';
     document.getElementById('barra-upload-fill').style.width = '0%';
     document.getElementById('btn-publicar').disabled = false;
     indexEdicao = null;
+  }
+  if (id === 'modal-reportagem') {
+    document.getElementById('rep-midia').value = '';
+    arquivosRep = [];
+    renderizarPreviewRep();
+    document.getElementById('barra-upload-rep-container').style.display = 'none';
+    document.getElementById('barra-upload-rep-fill').style.width = '0%';
+    document.getElementById('btn-salvar-rep').disabled = false;
+    document.getElementById('btn-salvar-rep').textContent = 'Publicar';
+    repEditandoId = null;
   }
 };
 
@@ -1234,6 +1244,8 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 ================================================================ */
 /* ── Array de arquivos selecionados (pub) ── */
 let arquivosPub = [];
+/* ── Array de arquivos da reportagem ── */
+let arquivosRep = [];
 
 window.previewMidia = function(input) {
   const novos = Array.from(input.files);
@@ -1617,10 +1629,22 @@ window.excluirNoticia = async function(docId) {
   if (!editorLogado) { alert('⛔ Apenas editores podem excluir notícias.'); return; }
   if (!confirm('Excluir esta notícia?')) return;
   try {
+    const { data: registro } = await supabase.from('materiais').select('midia_url,midia_public_id,tipo_midia,titulo').eq('id', docId).single();
     const { error } = await supabase.from('materiais').delete().eq('id', docId);
     if (error) throw error;
+    // Remove mídia(s) do Cloudinary
+    if (registro) {
+      try {
+        const parsed = JSON.parse(registro.midia_url);
+        if (Array.isArray(parsed)) {
+          for (const m of parsed) await excluirDoCloudinary(m.public_id, m.tipo);
+        }
+      } catch {
+        if (registro.midia_public_id) await excluirDoCloudinary(registro.midia_public_id, registro.tipo_midia);
+      }
+    }
     toast('🗑️ Notícia excluída.');
-    registrarAtividade('excluiu', `Notícia ID: ${docId}`);
+    registrarAtividade('excluiu', `Notícia: "${registro?.titulo || docId}"`);
     await carregarNoticias();
   } catch (err) {
     alert('Erro ao excluir: ' + err.message);
@@ -1718,15 +1742,16 @@ async function carregarNoticias() {
                onclick="abrirLightbox('${escapeHtml(m.url)}','${legenda}',false)"
                style="cursor:zoom-in"/>`;
     } else if (midiasArr.length > 1) {
+      const cols = Math.min(midiasArr.length, 3);
       const itens = midiasArr.map((m, i) => {
         const isVid = m.tipo && m.tipo.startsWith('video');
-        return isVid
+        return `<div style="aspect-ratio:1;overflow:hidden;background:#111;">` + (isVid
           ? `<video src="${escapeHtml(m.url)}" controls style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
           : `<img src="${escapeHtml(m.url)}" alt="${legenda} ${i+1}"
                  onclick="abrirLightbox('${escapeHtml(m.url)}','${legenda}',false)"
-                 style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/>`;
+                 style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/>`) + `</div>`;
       }).join('');
-      midiaHtml = `<div style="display:grid;grid-template-columns:repeat(${Math.min(midiasArr.length,3)},1fr);gap:2px;max-height:220px;overflow:hidden;">${itens}</div>`;
+      midiaHtml = `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:2px;">${itens}</div>`;
     }
     const textoId = 'texto-noticia-' + n.id;
     const textoLongo = (n.texto || '').length > LIMITE_TEXTO;
@@ -1753,7 +1778,10 @@ async function carregarNoticias() {
 // Atualização em tempo real via Supabase Realtime
 supabase
   .channel('materiais-realtime')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'materiais' }, () => carregarNoticias())
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'materiais' }, () => {
+    carregarNoticias();
+    carregarFotos();
+  })
   .subscribe();
 
 /* ================================================================
@@ -1813,9 +1841,6 @@ supabase
    REPORTAGEM — SUPABASE (tabela: reportagens)
 ================================================================ */
 let repEditandoId = null;
-
-/* ── Array de arquivos da reportagem ── */
-let arquivosRep = [];
 
 window.previewMidiaRep = function(input) {
   const novos = Array.from(input.files);
@@ -2082,15 +2107,16 @@ async function carregarReportagens() {
                onclick="abrirLightbox('${escapeHtml(m.url)}','${legenda}',false)"
                style="cursor:zoom-in"/>`;
     } else if (midiasArr.length > 1) {
+      const cols = Math.min(midiasArr.length, 3);
       const itens = midiasArr.map((m, i) => {
         const isVid = m.tipo && m.tipo.startsWith('video');
-        return isVid
+        return `<div style="aspect-ratio:1;overflow:hidden;background:#111;">` + (isVid
           ? `<video src="${escapeHtml(m.url)}" controls style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
           : `<img src="${escapeHtml(m.url)}" alt="${legenda} ${i+1}"
                  onclick="abrirLightbox('${escapeHtml(m.url)}','${legenda}',false)"
-                 style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/>`;
+                 style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/>`) + `</div>`;
       }).join('');
-      midiaHtml = `<div style="display:grid;grid-template-columns:repeat(${Math.min(midiasArr.length,3)},1fr);gap:2px;max-height:220px;overflow:hidden;">${itens}</div>`;
+      midiaHtml = `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:2px;">${itens}</div>`;
     }
     const textoId = 'texto-rep-' + r.id;
     const textoLongo = (r.texto || '').length > LIMITE_TEXTO;
