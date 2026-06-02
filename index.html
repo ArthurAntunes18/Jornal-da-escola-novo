@@ -1882,7 +1882,7 @@ async function carregarReportagens() {
                       margin-left:8px;">⭐ DESTAQUE</span>` : '';
     const turmaTag = r.turma
       ? `<span style="font-size:0.78rem;color:#888;margin-left:6px;">🏫 ${escapeHtml(r.turma)}</span>` : '';
-    const destinosTag = r.destinos && r.destinos.length > 1
+    const destinosTag = Array.isArray(r.destinos) && r.destinos.length > 0
       ? `<span style="font-size:0.72rem;color:#aaa;display:block;margin-top:4px;">
            Publicado em: ${r.destinos.join(' · ')}</span>` : '';
 
