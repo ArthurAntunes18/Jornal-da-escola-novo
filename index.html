@@ -737,22 +737,15 @@
       <input type="text" id="pub-legenda" placeholder="Ex: Alunos no pátio durante o intervalo"/>
     </div>
 
-    <label class="upload-label">
-      <input type="file" id="pub-midia" accept="image/*,video/*" onchange="previewMidia(this)"/>
-      📎 Clique para enviar imagem ou vídeo
+    <label class="upload-label" id="label-pub-midia">
+      <input type="file" id="pub-midia" accept="image/*,video/*" onchange="previewMidia(this)" multiple/>
+      <span id="txt-upload-pub">📎 Clique para enviar imagens ou vídeos</span>
     </label>
 
-    <!-- Preview -->
+    <!-- Grade de previews -->
     <div id="preview-midia-container" style="margin-top:12px;display:none;">
-      <div style="position:relative;display:inline-block;width:100%;">
-        <img id="preview-midia" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;display:none;"/>
-        <video id="preview-midia-video" controls style="max-width:100%;max-height:200px;display:none;"></video>
-        <button type="button" onclick="removerMidia()" title="Remover mídia"
-          style="position:absolute;top:8px;right:8px;background:rgba(231,76,60,.9);border:none;
-                 color:#fff;width:30px;height:30px;border-radius:50%;font-size:1rem;line-height:1;
-                 cursor:pointer;display:flex;align-items:center;justify-content:center;
-                 box-shadow:0 2px 6px rgba(0,0,0,.3);">✕</button>
-      </div>
+      <div id="preview-midia-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;"></div>
+      <p style="font-size:0.8rem;color:#888;margin-top:6px;" id="pub-midia-count"></p>
     </div>
 
     <!-- Barra de progresso do upload -->
@@ -1225,6 +1218,8 @@ window.fecharModal = function(id) {
   if (id === 'modal-publicacao') {
     document.getElementById('pub-midia').value = '';
     document.getElementById('pub-autor').value = '';
+    arquivosPub = [];
+    renderizarPreviewPub();
     document.getElementById('preview-midia').style.display = 'none';
     document.getElementById('preview-midia-video').style.display = 'none';
     document.getElementById('preview-midia-container').style.display = 'none';
@@ -1244,43 +1239,80 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 /* ================================================================
    PREVIEW DE MÍDIA
 ================================================================ */
+/* ── Array de arquivos selecionados (pub) ── */
+let arquivosPub = [];
+
 window.previewMidia = function(input) {
-  const previewImg   = document.getElementById('preview-midia');
-  const previewVideo = document.getElementById('preview-midia-video');
-  const container    = document.getElementById('preview-midia-container');
-  previewImg.style.display   = 'none';
-  previewVideo.style.display = 'none';
-  container.style.display    = 'none';
-  const arquivo = input.files[0];
-  if (!arquivo) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    container.style.display = 'block';
-    if (arquivo.type.startsWith('video')) {
-      previewVideo.src           = e.target.result;
-      previewVideo.style.display = 'block';
-    } else {
-      previewImg.src           = e.target.result;
-      previewImg.style.display = 'block';
+  const novos = Array.from(input.files);
+  if (!novos.length) return;
+  // Acumula sem duplicar nomes
+  novos.forEach(f => {
+    if (!arquivosPub.find(a => a.name === f.name && a.size === f.size)) {
+      arquivosPub.push(f);
     }
-  };
-  reader.readAsDataURL(arquivo);
+  });
+  // Limpa o input para permitir selecionar os mesmos arquivos novamente
+  input.value = '';
+  renderizarPreviewPub();
+};
+
+function renderizarPreviewPub() {
+  const container = document.getElementById('preview-midia-container');
+  const grid      = document.getElementById('preview-midia-grid');
+  const count     = document.getElementById('pub-midia-count');
+
+  if (arquivosPub.length === 0) {
+    container.style.display = 'none';
+    grid.innerHTML = '';
+    count.textContent = '';
+    return;
+  }
+
+  container.style.display = 'block';
+  count.textContent = `${arquivosPub.length} arquivo(s) selecionado(s)`;
+
+  grid.innerHTML = '';
+  arquivosPub.forEach((arquivo, idx) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;aspect-ratio:1;overflow:hidden;background:#1a1a2e;border:1px solid var(--borda);';
+
+    if (arquivo.type.startsWith('video')) {
+      const v = document.createElement('video');
+      v.src = URL.createObjectURL(arquivo);
+      v.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+      wrap.appendChild(v);
+    } else {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(arquivo);
+      img.alt = arquivo.name;
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+      wrap.appendChild(img);
+    }
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.title = 'Remover';
+    btn.textContent = '✕';
+    btn.style.cssText = 'position:absolute;top:4px;right:4px;background:rgba(231,76,60,.9);border:none;' +
+      'color:#fff;width:24px;height:24px;border-radius:50%;font-size:0.8rem;line-height:1;' +
+      'cursor:pointer;display:flex;align-items:center;justify-content:center;' +
+      'box-shadow:0 1px 4px rgba(0,0,0,.4);padding:0;';
+    btn.onclick = () => { arquivosPub.splice(idx, 1); renderizarPreviewPub(); };
+    wrap.appendChild(btn);
+
+    grid.appendChild(wrap);
+  });
+}
+
+window.removerMidia = function() {
+  arquivosPub = [];
+  renderizarPreviewPub();
 };
 
 window.alterarTipoPub = function() {
   const tipo = document.getElementById('pub-tipo').value;
   document.getElementById('bloco-descricao').style.display = tipo === 'noticia' ? 'block' : 'none';
   document.getElementById('bloco-legenda').style.display   = tipo === 'foto'    ? 'block' : 'none';
-};
-
-window.removerMidia = function() {
-  document.getElementById('pub-midia').value = '';
-  document.getElementById('preview-midia').src           = '';
-  document.getElementById('preview-midia').style.display = 'none';
-  document.getElementById('preview-midia-video').pause();
-  document.getElementById('preview-midia-video').src     = '';
-  document.getElementById('preview-midia-video').style.display = 'none';
-  document.getElementById('preview-midia-container').style.display = 'none';
 };
 
 window.removerMidiaRep = function() {
@@ -1411,7 +1443,6 @@ window.salvarPublicacao = async function() {
   if (!editorLogado) { alert('⛔ Apenas editores podem publicar conteúdo.'); return; }
   const tipo   = document.getElementById('pub-tipo').value;
   const titulo = document.getElementById('pub-titulo').value.trim();
-  const arquivo = document.getElementById('pub-midia').files[0];
 
   if (!titulo) { alert('Por favor, preencha o título.'); return; }
 
@@ -1420,64 +1451,111 @@ window.salvarPublicacao = async function() {
   btnPublicar.textContent = 'Publicando...';
 
   try {
-    const data = new Date().toLocaleDateString('pt-BR', {
+    const dataFormatada = new Date().toLocaleDateString('pt-BR', {
       day: '2-digit', month: 'long', year: 'numeric'
     });
 
-    let midiaUrl      = null;
-    let midiaPublicId = null;
-    let tipoMidia     = null;
-
-    if (arquivo) {
-      const pasta = tipo === 'noticia' ? 'noticias' : 'fotos';
-      const resultado = await uploadArquivo(arquivo, pasta);
-      midiaUrl      = resultado.url;
-      midiaPublicId = resultado.path;
-      tipoMidia     = arquivo.type;
-    }
-
     const tabela = 'materiais';
 
-    const item = {
-      tipo: tipo,
-      titulo,
-      data,
-      midia_url:       midiaUrl,
-      midia_public_id: midiaPublicId,
-      tipo_midia:      tipoMidia,
-      created_at:       Date.now()
-    };
-
-    if (tipo === 'noticia') {
-      item.texto = document.getElementById('pub-texto').value.trim();
-      item.autor = document.getElementById('pub-autor').value.trim();
-    } else {
-      item.legenda = document.getElementById('pub-legenda').value.trim();
-    }
-
-    let error;
+    // ── EDIÇÃO (sempre arquivo único) ──
     if (indexEdicao) {
-      // Não sobrescreve midia_url/midia_public_id se não enviou novo arquivo
-      if (!arquivo) {
-        delete item.midia_url;
-        delete item.midia_public_id;
-        delete item.tipo_midia;
+      const arquivo = arquivosPub[0] || null;
+      let midiaUrl = null, midiaPublicId = null, tipoMidia = null;
+      if (arquivo) {
+        const pasta = tipo === 'noticia' ? 'noticias' : 'fotos';
+        const res = await uploadArquivo(arquivo, pasta);
+        midiaUrl = res.url; midiaPublicId = res.path; tipoMidia = arquivo.type;
       }
-      ({ error } = await supabase.from(tabela).update(item).eq('id', indexEdicao.id));
-      if (!error) {
-        toast(`✅ ${tipo === 'noticia' ? 'Notícia' : 'Foto'} atualizada!`);
-        registrarAtividade('editou', `${tipo === 'noticia' ? 'Notícia' : 'Foto'}: "${titulo}"`);
+      const item = { tipo, titulo, data: dataFormatada, created_at: Date.now() };
+      if (tipo === 'noticia') { item.texto = document.getElementById('pub-texto').value.trim(); item.autor = document.getElementById('pub-autor').value.trim(); }
+      else { item.legenda = document.getElementById('pub-legenda').value.trim(); }
+      if (arquivo) { item.midia_url = midiaUrl; item.midia_public_id = midiaPublicId; item.tipo_midia = tipoMidia; }
+      const { error } = await supabase.from(tabela).update(item).eq('id', indexEdicao.id);
+      if (error) throw error;
+      toast(`✅ ${tipo === 'noticia' ? 'Notícia' : 'Foto'} atualizada!`);
+      registrarAtividade('editou', `${tipo === 'noticia' ? 'Notícia' : 'Foto'}: "${titulo}"`);
+
+    // ── NOVA PUBLICAÇÃO ──
+    } else if (tipo === 'noticia') {
+      // Notícia: único arquivo
+      const arquivo = arquivosPub[0] || null;
+      let midiaUrl = null, midiaPublicId = null, tipoMidia = null;
+      if (arquivo) {
+        const res = await uploadArquivo(arquivo, 'noticias');
+        midiaUrl = res.url; midiaPublicId = res.path; tipoMidia = arquivo.type;
       }
+      const item = {
+        tipo, titulo, data: dataFormatada, created_at: Date.now(),
+        texto: document.getElementById('pub-texto').value.trim(),
+        autor: document.getElementById('pub-autor').value.trim(),
+        midia_url: midiaUrl, midia_public_id: midiaPublicId, tipo_midia: tipoMidia
+      };
+      const { error } = await supabase.from(tabela).insert([item]);
+      if (error) throw error;
+      toast('✅ Notícia publicada!');
+      registrarAtividade('publicou', `Notícia: "${titulo}"`);
+
     } else {
-      ({ error } = await supabase.from(tabela).insert([item]));
-      if (!error) {
-        toast(`✅ ${tipo === 'noticia' ? 'Notícia' : 'Foto'} publicada!`);
-        registrarAtividade('publicou', `${tipo === 'noticia' ? 'Notícia' : 'Foto'}: "${titulo}"`);
+      // Foto/vídeo: múltiplos arquivos, um insert por arquivo
+      const legenda = document.getElementById('pub-legenda').value.trim();
+      const total   = arquivosPub.length;
+      const barraContainer = document.getElementById('barra-upload-container');
+      const barraFill      = document.getElementById('barra-upload-fill');
+      const barraLabel     = document.getElementById('barra-upload-label');
+      barraContainer.style.display = 'block';
+
+      if (total === 0) {
+        // Sem arquivo: publica só com título/legenda
+        const item = { tipo, titulo, legenda, data: dataFormatada, created_at: Date.now(),
+                       midia_url: null, midia_public_id: null, tipo_midia: null };
+        const { error } = await supabase.from(tabela).insert([item]);
+        if (error) throw error;
+      } else {
+        for (let i = 0; i < total; i++) {
+          const arquivo = arquivosPub[i];
+          barraLabel.textContent = `Enviando ${i + 1} de ${total}...`;
+          barraFill.style.width  = '0%';
+
+          // Upload individual com progresso
+          const res = await new Promise((resolve, reject) => {
+            const fd = new FormData();
+            fd.append('file', arquivo);
+            fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            fd.append('folder', 'jornal/fotos');
+            const xhr = new XMLHttpRequest();
+            const rt  = arquivo.type.startsWith('video') ? 'video' : 'image';
+            xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${rt}/upload`);
+            xhr.upload.onprogress = e => {
+              if (e.lengthComputable) {
+                barraFill.style.width = Math.round(e.loaded / e.total * 100) + '%';
+              }
+            };
+            xhr.onload = () => xhr.status === 200
+              ? resolve(JSON.parse(xhr.responseText))
+              : reject(new Error(JSON.parse(xhr.responseText).error?.message || 'Erro no upload'));
+            xhr.onerror = () => reject(new Error('Falha de rede ao fazer upload.'));
+            xhr.send(fd);
+          });
+
+          // Título com sufixo se múltiplos
+          const tituloItem = total > 1 ? `${titulo} (${i + 1}/${total})` : titulo;
+          const item = {
+            tipo, titulo: tituloItem, legenda, data: dataFormatada, created_at: Date.now() + i,
+            midia_url: res.secure_url, midia_public_id: res.public_id, tipo_midia: arquivo.type
+          };
+          const { error } = await supabase.from(tabela).insert([item]);
+          if (error) throw error;
+        }
+        barraLabel.textContent = 'Upload concluído!';
+        barraFill.style.width  = '100%';
       }
+
+      toast(`✅ ${total > 1 ? total + ' fotos publicadas!' : 'Foto publicada!'}`);
+      registrarAtividade('publicou', `Foto(s): "${titulo}" — ${total} arquivo(s)`);
     }
 
-    if (error) throw error;
-
+    arquivosPub = [];
+    renderizarPreviewPub();
     await carregarNoticias();
     await carregarFotos();
     window.fecharModal('modal-publicacao');
