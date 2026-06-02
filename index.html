@@ -728,6 +728,8 @@
     <div id="bloco-descricao">
       <label>Texto da Notícia</label>
       <textarea id="pub-texto" placeholder="Digite o conteúdo da notícia aqui..."></textarea>
+      <label>Autor(es)</label>
+      <input type="text" id="pub-autor" placeholder="Ex: Maria Silva, João Souza"/>
     </div>
 
     <div id="bloco-legenda" style="display:none">
@@ -742,8 +744,15 @@
 
     <!-- Preview -->
     <div id="preview-midia-container" style="margin-top:12px;display:none;">
-      <img id="preview-midia" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;display:none;"/>
-      <video id="preview-midia-video" controls style="max-width:100%;max-height:200px;display:none;"></video>
+      <div style="position:relative;display:inline-block;width:100%;">
+        <img id="preview-midia" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;display:none;"/>
+        <video id="preview-midia-video" controls style="max-width:100%;max-height:200px;display:none;"></video>
+        <button type="button" onclick="removerMidia()" title="Remover mídia"
+          style="position:absolute;top:8px;right:8px;background:rgba(231,76,60,.9);border:none;
+                 color:#fff;width:30px;height:30px;border-radius:50%;font-size:1rem;line-height:1;
+                 cursor:pointer;display:flex;align-items:center;justify-content:center;
+                 box-shadow:0 2px 6px rgba(0,0,0,.3);">✕</button>
+      </div>
     </div>
 
     <!-- Barra de progresso do upload -->
@@ -801,8 +810,15 @@
     </label>
 
     <div id="preview-rep-container" style="margin-top:12px;display:none;">
-      <img id="preview-rep" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;display:none;"/>
-      <video id="preview-rep-video" controls style="max-width:100%;max-height:200px;display:none;"></video>
+      <div style="position:relative;display:inline-block;width:100%;">
+        <img id="preview-rep" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;display:none;"/>
+        <video id="preview-rep-video" controls style="max-width:100%;max-height:200px;display:none;"></video>
+        <button type="button" onclick="removerMidiaRep()" title="Remover mídia"
+          style="position:absolute;top:8px;right:8px;background:rgba(231,76,60,.9);border:none;
+                 color:#fff;width:30px;height:30px;border-radius:50%;font-size:1rem;line-height:1;
+                 cursor:pointer;display:flex;align-items:center;justify-content:center;
+                 box-shadow:0 2px 6px rgba(0,0,0,.3);">✕</button>
+      </div>
     </div>
 
     <div id="barra-upload-rep-container" style="margin-top:12px;display:none;">
@@ -1208,6 +1224,7 @@ window.fecharModal = function(id) {
   document.getElementById(id).classList.remove('aberto');
   if (id === 'modal-publicacao') {
     document.getElementById('pub-midia').value = '';
+    document.getElementById('pub-autor').value = '';
     document.getElementById('preview-midia').style.display = 'none';
     document.getElementById('preview-midia-video').style.display = 'none';
     document.getElementById('preview-midia-container').style.display = 'none';
@@ -1254,6 +1271,26 @@ window.alterarTipoPub = function() {
   const tipo = document.getElementById('pub-tipo').value;
   document.getElementById('bloco-descricao').style.display = tipo === 'noticia' ? 'block' : 'none';
   document.getElementById('bloco-legenda').style.display   = tipo === 'foto'    ? 'block' : 'none';
+};
+
+window.removerMidia = function() {
+  document.getElementById('pub-midia').value = '';
+  document.getElementById('preview-midia').src           = '';
+  document.getElementById('preview-midia').style.display = 'none';
+  document.getElementById('preview-midia-video').pause();
+  document.getElementById('preview-midia-video').src     = '';
+  document.getElementById('preview-midia-video').style.display = 'none';
+  document.getElementById('preview-midia-container').style.display = 'none';
+};
+
+window.removerMidiaRep = function() {
+  document.getElementById('rep-midia').value = '';
+  document.getElementById('preview-rep').src           = '';
+  document.getElementById('preview-rep').style.display = 'none';
+  document.getElementById('preview-rep-video').pause();
+  document.getElementById('preview-rep-video').src     = '';
+  document.getElementById('preview-rep-video').style.display = 'none';
+  document.getElementById('preview-rep-container').style.display = 'none';
 };
 
 /* ================================================================
@@ -1352,6 +1389,7 @@ window.abrirModalPublicacao = function(tipo, docId) {
       document.getElementById('pub-tipo').value   = tipo;
       document.getElementById('pub-titulo').value = d.titulo || '';
       if (tipo === 'noticia') document.getElementById('pub-texto').value   = d.texto   || '';
+      if (tipo === 'noticia') document.getElementById('pub-autor').value   = d.autor   || '';
       if (tipo === 'foto')    document.getElementById('pub-legenda').value = d.legenda || '';
       window.alterarTipoPub();
     });
@@ -1359,6 +1397,7 @@ window.abrirModalPublicacao = function(tipo, docId) {
     document.getElementById('pub-tipo').value    = 'noticia';
     document.getElementById('pub-titulo').value  = '';
     document.getElementById('pub-texto').value   = '';
+    document.getElementById('pub-autor').value   = '';
     document.getElementById('pub-legenda').value = '';
     window.alterarTipoPub();
   }
@@ -1411,6 +1450,7 @@ window.salvarPublicacao = async function() {
 
     if (tipo === 'noticia') {
       item.texto = document.getElementById('pub-texto').value.trim();
+      item.autor = document.getElementById('pub-autor').value.trim();
     } else {
       item.legenda = document.getElementById('pub-legenda').value.trim();
     }
@@ -1548,7 +1588,7 @@ async function carregarNoticias() {
       <article class="card">
         ${midiaHtml}
         <div class="card-corpo">
-          <p class="card-data">${escapeHtml(n.data)}</p>
+          <p class="card-data">${escapeHtml(n.data)}${n.autor ? ' · ✍️ ' + escapeHtml(n.autor) : ''}</p>
           <h2>${escapeHtml(n.titulo)}</h2>
           ${textoHtml}
         </div>
