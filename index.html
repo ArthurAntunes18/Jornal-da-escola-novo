@@ -1469,10 +1469,13 @@ window.salvarPublicacao = async function() {
       if (tipo === 'noticia') { item.texto = document.getElementById('pub-texto').value.trim(); item.autor = document.getElementById('pub-autor').value.trim(); }
       else { item.legenda = document.getElementById('pub-legenda').value.trim(); }
       if (midiasNovas.length > 0) {
-        item.midia_url       = midiasNovas[0].url;
+        const midiaUrlSalva = midiasNovas.length === 1 ? midiasNovas[0].url
+          : JSON.stringify(midiasNovas.map(m => ({ url: m.url, public_id: m.public_id, tipo: m.tipo })));
+        item.midia_url       = midiaUrlSalva;
         item.midia_public_id = midiasNovas[0].public_id;
         item.tipo_midia      = midiasNovas[0].tipo;
-        if (tipo === 'noticia') item.midias = midiasNovas;
+        // Remove midias caso exista de versão anterior
+        delete item.midias;
       }
       const { error } = await supabase.from(tabela).update(item).eq('id', indexEdicao.id);
       if (error) throw error;
@@ -1515,15 +1518,19 @@ window.salvarPublicacao = async function() {
         barraLabel.textContent = 'Upload concluído!';
         barraFill.style.width  = '100%';
       }
+      // Salva múltiplas URLs como JSON em midia_url (sem precisar de nova coluna no banco)
+      // Retrocompatível: se for 1 mídia, salva a URL direto; se forem várias, salva JSON array
+      const midiaUrlSalva = midiasNovas.length === 0 ? null
+        : midiasNovas.length === 1 ? midiasNovas[0].url
+        : JSON.stringify(midiasNovas.map(m => ({ url: m.url, public_id: m.public_id, tipo: m.tipo })));
+
       const item = {
         tipo, titulo, data: dataFormatada, created_at: Date.now(),
         texto: document.getElementById('pub-texto').value.trim(),
         autor: document.getElementById('pub-autor').value.trim(),
-        // Compatibilidade: 1ª mídia nos campos antigos
-        midia_url:       midiasNovas[0]?.url       || null,
+        midia_url:       midiaUrlSalva,
         midia_public_id: midiasNovas[0]?.public_id || null,
         tipo_midia:      midiasNovas[0]?.tipo       || null,
-        midias:          midiasNovas
       };
       const { error } = await supabase.from(tabela).insert([item]);
       if (error) throw error;
@@ -1684,9 +1691,22 @@ async function carregarNoticias() {
   lista.innerHTML = rows.map(n => {
     const legenda = escapeHtml(n.titulo);
 
-    // Suporte a múltiplas mídias com fallback para midia_url
-    const midiasArr = (n.midias && n.midias.length > 0) ? n.midias
-      : (n.midia_url ? [{ url: n.midia_url, public_id: n.midia_public_id, tipo: n.tipo_midia }] : []);
+    // midia_url pode ser: null | URL string | JSON array string (múltiplas mídias)
+    let midiasArr = [];
+    if (n.midia_url) {
+      try {
+        const parsed = JSON.parse(n.midia_url);
+        if (Array.isArray(parsed)) {
+          midiasArr = parsed; // múltiplas mídias
+        } else {
+          midiasArr = [{ url: n.midia_url, public_id: n.midia_public_id, tipo: n.tipo_midia }];
+        }
+      } catch {
+        midiasArr = [{ url: n.midia_url, public_id: n.midia_public_id, tipo: n.tipo_midia }];
+      }
+    }
+    // fallback coluna midias (legado)
+    if (midiasArr.length === 0 && n.midias && n.midias.length > 0) midiasArr = n.midias;
 
     let midiaHtml = '';
     if (midiasArr.length === 1) {
@@ -1953,23 +1973,18 @@ window.salvarReportagem = async function() {
     // Compatibilidade: mantém midia_url/midia_public_id/tipo_midia com a 1ª mídia
     // e salva o array completo em midias (coluna jsonb)
     if (midiasNovas.length > 0) {
-      item.midia_url       = midiasNovas[0].url;
+      const midiaUrlSalva = midiasNovas.length === 1 ? midiasNovas[0].url
+        : JSON.stringify(midiasNovas.map(m => ({ url: m.url, public_id: m.public_id, tipo: m.tipo })));
+      item.midia_url       = midiaUrlSalva;
       item.midia_public_id = midiasNovas[0].public_id;
       item.tipo_midia      = midiasNovas[0].tipo;
-      item.midias          = midiasNovas;
-    } else if (!repEditandoId) {
-      // Nova reportagem sem mídia
-      item.midias = [];
     }
 
     let error;
     if (repEditandoId) {
-      if (midiasNovas.length > 0) {
-        // Se enviou novas mídias, substitui
-        // nada a fazer além do que já está em item
-      } else {
+      if (midiasNovas.length === 0) {
         // Não enviou novas — não sobrescreve as antigas
-        delete item.midia_url; delete item.midia_public_id; delete item.tipo_midia; delete item.midias;
+        delete item.midia_url; delete item.midia_public_id; delete item.tipo_midia;
       }
       ({ error } = await supabase.from('reportagens').update(item).eq('id', repEditandoId));
       if (!error) {
@@ -2041,9 +2056,21 @@ async function carregarReportagens() {
   lista.innerHTML = rows.map(r => {
     const legenda = escapeHtml(r.titulo);
 
-    // Suporte a múltiplas mídias (coluna midias) com fallback para midia_url
-    const midiasArr = (r.midias && r.midias.length > 0) ? r.midias
-      : (r.midia_url ? [{ url: r.midia_url, public_id: r.midia_public_id, tipo: r.tipo_midia }] : []);
+    // midia_url pode ser: null | URL string | JSON array string (múltiplas mídias)
+    let midiasArr = [];
+    if (r.midia_url) {
+      try {
+        const parsed = JSON.parse(r.midia_url);
+        if (Array.isArray(parsed)) {
+          midiasArr = parsed;
+        } else {
+          midiasArr = [{ url: r.midia_url, public_id: r.midia_public_id, tipo: r.tipo_midia }];
+        }
+      } catch {
+        midiasArr = [{ url: r.midia_url, public_id: r.midia_public_id, tipo: r.tipo_midia }];
+      }
+    }
+    if (midiasArr.length === 0 && r.midias && r.midias.length > 0) midiasArr = r.midias;
 
     let midiaHtml = '';
     if (midiasArr.length === 1) {
