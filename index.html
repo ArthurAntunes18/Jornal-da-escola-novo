@@ -533,11 +533,91 @@
     .aviso-data { font-size: 0.8rem; color: var(--amarelo); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
     .aviso-acoes { display: none; gap: 8px; margin-top: 16px; }
 
-    @media (max-width: 600px) {
-      header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
-      main   { padding: 24px 16px; }
-      .modal { padding: 24px 20px; }
-      .proposta-bloco { padding: 24px 20px; }
+    /* ── RESPONSIVO MOBILE ── */
+    @media (max-width: 768px) {
+
+      /* Header */
+      header {
+        padding: 14px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .logo-area h1 { font-size: 2rem; }
+      .logo-area span { font-size: 0.75rem; }
+      #btn-login-topo, #btn-trocar-fundo {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+      }
+      /* Botões do header ficam lado a lado */
+      header > div:last-child,
+      header > div.header-acoes {
+        display: flex; flex-wrap: wrap; gap: 8px;
+      }
+
+      /* Nav */
+      nav button {
+        min-width: 110px;
+        padding: 14px 16px;
+        font-size: 0.85rem;
+      }
+
+      /* Main */
+      main { padding: 24px 14px; }
+
+      /* Grid de cards: 1 coluna */
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      /* Grid de programação: 1 coluna */
+      .programacao-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      /* Seção título */
+      .secao-titulo { font-size: 1.6rem; margin-bottom: 24px; }
+
+      /* Modais */
+      .modal {
+        padding: 24px 16px;
+        max-height: 95vh;
+        margin: 0 8px;
+        width: calc(100% - 16px);
+      }
+      .modal h2 { font-size: 1.4rem; }
+      .modal-btns { flex-direction: column; }
+
+      /* Hero */
+      .hero-conteudo { padding: 24px 16px; }
+      .hero-btn { padding: 14px 32px; font-size: 0.95rem; }
+
+      /* Proposta */
+      .proposta-bloco { padding: 20px 16px; }
+
+      /* Aviso card */
+      .aviso-card { padding: 18px 16px; }
+
+      /* Cardápio */
+      .cardapio-dia { padding: 16px; }
+
+      /* FAB */
+      #fab { bottom: 24px; right: 20px; width: 56px; height: 56px; font-size: 1.7rem; }
+
+      /* Footer */
+      footer { padding: 24px 16px; }
+      #bloco-endereco { flex-direction: column; align-items: center; gap: 10px; }
+
+      /* Toast */
+      #toast { width: 90%; font-size: 0.88rem; padding: 10px 16px; }
+    }
+
+    @media (max-width: 400px) {
+      .logo-area h1 { font-size: 1.6rem; }
+      nav button { min-width: 90px; font-size: 0.78rem; padding: 12px 10px; }
+      .hero-titulo { font-size: 2rem; }
     }
 
     /* ── TEXTO EXPANSÍVEL (ler mais / ler menos) ── */
