@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta name="keywords" content="CEPI, cepi, GSR, gsr, CEPI gsr, cepi gsr, Gomes de Souza Ramos, gomes de souza ramos">
+  <meta name="keywords" content="CEPI, cepi, GSR, gsr, CEPI gsr, cepi gsr, Gomes de Souza Ramos, gomes de souza ramos, jornal estudantil, jornal GSR, jornal gsr, jornal da escola">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="google-site-verification" content="p7FBHCQec61ValE7b2kRsz-hJXZnf72aEdy4tPYO5z4" />
@@ -145,6 +145,13 @@
       display: flex; align-items: flex-end;
       justify-content: space-between;
       position: sticky; top: 0; z-index: 100;
+    }
+    .logo-area {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .logo-area img.brasao {
+      height: 56px; width: auto;
+      object-fit: contain; flex-shrink: 0;
     }
     .logo-area h1 {
       font-family: var(--fonte-titulo);
@@ -478,15 +485,15 @@
 
     #btn-youtube {
       display: inline-flex; align-items: center; gap: 8px;
-      margin-top: 16px;
+      margin-top: 16px; margin-left: 12px;
       padding: 10px 22px;
-      background: linear-gradient(135deg, #e92222, #cc0f0f, #d3110b);
+      background: #ff0000;
       color: #fff; font-weight: 700; font-size: 0.88rem;
       letter-spacing: 1px; text-transform: uppercase;
       text-decoration: none; border-radius: 8px;
       transition: opacity .2s, transform .2s;
     }
-     #btn-youtube:hover { opacity: .85; transform: translateY(-2px); }
+    #btn-youtube:hover { opacity: .85; transform: translateY(-2px); }
 
     /* ── BLOCO DE ENDEREÇO NO RODAPÉ ── */
     #bloco-endereco {
@@ -545,7 +552,77 @@
     .aviso-data { font-size: 0.8rem; color: var(--amarelo); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
     .aviso-acoes { display: none; gap: 8px; margin-top: 16px; }
 
-    /* ── RESPONSIVO MOBILE ── */
+    /* ── CRIADORES ── */
+    #bloco-criadores {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--borda);
+    }
+    #bloco-criadores > p {
+      font-size: 0.8rem; color: #aaa;
+      letter-spacing: 2px; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    #lista-criadores {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 10px;
+    }
+    #lista-criadores span {
+      background: #fff; border: 1px solid var(--borda);
+      border-radius: 20px; padding: 4px 14px;
+      font-size: 0.85rem; color: #555;
+    }
+
+    /* ── CARDS DE DESTAQUE ── */
+    .destaque-card {
+      background: #fff; border: 1px solid var(--borda);
+      overflow: hidden; transition: transform .2s, border-color .2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .destaque-card:hover { transform: translateY(-4px); border-color: var(--amarelo); }
+    .destaque-card-img {
+      width: 100%; height: 200px; object-fit: cover; display: block;
+      cursor: zoom-in;
+    }
+    .destaque-card-img-placeholder {
+      width: 100%; height: 200px;
+      background: linear-gradient(135deg, #f5c400 0%, #e0a800 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+    }
+    .destaque-card-corpo { padding: 20px; }
+    .destaque-card-corpo h2 {
+      font-family: var(--fonte-titulo); font-size: 1.25rem;
+      color: #1a1a2e; margin-bottom: 6px;
+    }
+    .destaque-card-corpo .destaque-turma {
+      display: inline-block;
+      background: var(--amarelo); color: #1a1a2e;
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 10px; margin-bottom: 10px;
+    }
+    .destaque-card-corpo p { color: #555; font-size: 0.95rem; }
+
+    /* ── PROGRAMAÇÃO — ARQUIVO PDF/DOC ── */
+    .prog-arquivo {
+      display: flex; align-items: center; gap: 10px;
+      background: #f5f6fa; border: 1px solid var(--borda);
+      padding: 10px 14px; margin-top: 10px;
+      text-decoration: none; color: #1a1a2e;
+      font-size: 0.9rem; font-weight: 600;
+      transition: border-color .2s, background .2s;
+    }
+    .prog-arquivo:hover { border-color: var(--amarelo); background: #fffbe6; }
+    .prog-arquivo-embed {
+      width: 100%; height: 520px;
+      border: 1px solid var(--borda);
+      margin-top: 10px; display: block;
+      background: #f5f6fa;
+    }
+    @media (max-width: 600px) {
+      .prog-arquivo-embed { height: 380px; }
+    }
     @media (max-width: 768px) {
 
       /* Header */
@@ -743,10 +820,11 @@
 <!-- HEADER -->
 <header>
   <div class="logo-area">
-    <h1>📰 O Estudante</h1>
-    <!-- ↓ COLOQUE O NOME DA SUA ESCOLA AQUI ↓ -->
-    <span>CEPI Gomes de Souza Ramos — Jornalismo Estudantil</span>
-
+    <img src="imagensj/brasao.png.jpeg" alt="Brasão" class="brasao">
+    <div>
+      <h1>O Estudante</h1>
+      <span>CEPI Gomes de Souza Ramos — Jornalismo Estudantil</span>
+    </div>
   </div>
   <div style="display:flex;align-items:center;gap:16px;">
     <span id="status-editor">✏️ Modo Editor</span>
@@ -762,6 +840,7 @@
   <button onclick="trocarAba('cardapio', this)">🍽️ Cardápio</button>
   <button onclick="trocarAba('programacao', this)">📅 Programação</button>
   <button onclick="trocarAba('avisos', this)">🔔 Avisos</button>
+  <button onclick="trocarAba('destaques', this)">⭐ Destaques</button>
   <button onclick="trocarAba('mais', this)">☰ Mais</button>
 </nav>
 
@@ -818,6 +897,16 @@
   <!-- ABA PROGRAMAÇÃO -->
   <section id="aba-programacao" class="aba">
     <h2 class="secao-titulo">Programação da Semana</h2>
+
+    <!-- ÁREA DE ARQUIVO (horários, grade, etc.) -->
+    <div id="programacao-arquivo-area" style="margin-bottom:40px;"></div>
+    <button class="btn-primario so-editor" onclick="abrirModalArquivoProg()"
+            style="display:none;max-width:300px;margin-bottom:32px;">
+      📎 Enviar Horário / Grade (PDF ou imagem)
+    </button>
+
+    <!-- EVENTOS DA SEMANA -->
+    <h3 style="font-family:var(--fonte-titulo);font-size:1.4rem;color:#1a1a2e;margin-bottom:20px;">Eventos</h3>
     <div class="programacao-grid" id="lista-programacao">
       <div class="vazio" style="grid-column:1/-1">
         <span>📅</span>
@@ -845,6 +934,21 @@
     </button>
   </section>
 
+  <!-- ─── ABA DESTAQUES ─── -->
+  <section id="aba-destaques" class="aba">
+    <h2 class="secao-titulo">Destaques</h2>
+    <button class="btn-primario so-editor" onclick="abrirModalDestaque()"
+            style="display:none;max-width:280px;margin-bottom:32px;">
+      ⭐ Novo Destaque
+    </button>
+    <div class="grid" id="lista-destaques">
+      <div class="vazio" style="grid-column:1/-1">
+        <span>⭐</span>
+        <p>Nenhum destaque publicado ainda.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ─── ABA MAIS ─── -->
   <section id="aba-mais" class="aba">
     <h2 style="text-align:center;margin-bottom:32px;">Proposta Pedagógica</h2>
@@ -857,7 +961,7 @@
 </main>
 
 <footer>
-  <strong>O Estudante</strong> — Jornal CEPI Gomes de Souza Ramos &bull; 2026
+  <strong>Protagonismo Juvenil</strong> — Jornal CEPI Gomes de Souza Ramos &bull; 2026
   <br>
   <strong>Endereço</strong> — Av. Planalto s/n - Vila Jaiara, Anápolis - GO, 75064-720
   <br>
@@ -870,17 +974,29 @@
     </svg>
     Instagram da escola
   </a>
-  
+
   <a id="btn-youtube" href="https://youtube.com/@gomesdesouzaramosgsrtube2178?si=em4trATFbBT9zyGQ" target="_blank" rel="noopener">
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608C4.516 2.497 5.783 2.226 7.15 2.163 8.416 2.105 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.333.014 7.053.072 5.197.157 3.355.673 2.014 2.014.673 3.355.157 5.197.072 7.053.014 8.333 0 8.741 0 12c0 3.259.014 3.667.072 4.947.085 1.856.601 3.698 1.942 5.039 1.341 1.341 3.183 1.857 5.039 1.942C8.333 23.986 8.741 24 12 24s3.667-.014 4.947-.072c1.856-.085 3.698-.601 5.039-1.942 1.341-1.341 1.857-3.183 1.942-5.039C23.986 15.667 24 15.259 24 12s-.014-3.667-.072-4.947c-.085-1.856-.601-3.698-1.942-5.039C20.645.673 18.803.157 16.947.072 15.667.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324A6.162 6.162 0 0 0 12 5.838zm0 10.162a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
     </svg>
-    Youtube da escola
+    YouTube da escola
   </a>
-  
-</footer>
 
-<!-- LIGHTBOX -->
+  <!-- ================================================================
+       CRIADORES DO SITE
+       ↓ Adicione ou remova nomes aqui ↓
+  ================================================================ -->
+  <div id="bloco-criadores">
+    <p>✨ Site desenvolvido por</p>
+    <div id="lista-criadores">
+      <!-- ADICIONE OS NOMES DOS CRIADORES ABAIXO — um por linha -->
+      <span>Arthur de Oliveira Antunes</span>
+      <span>Igor Soares Couto</span>
+      <!-- ↑ INSIRA OU REMOVA NOMES AQUI ↑ -->
+    </div>
+  </div>
+
+</footer>
 <div id="lightbox">
   <button id="lightbox-fechar" onclick="fecharLightbox()" title="Fechar (Esc)">✕</button>
   <img id="lightbox-img" src="" alt=""/>
@@ -1113,6 +1229,73 @@
   </div>
 </div>
 
+<!-- MODAL DESTAQUE -->
+<div class="modal-overlay" id="modal-destaque">
+  <div class="modal" style="max-width:600px;">
+    <button class="fechar-modal" onclick="fecharModal('modal-destaque')">✕</button>
+    <h2 id="titulo-modal-destaque">Novo Destaque</h2>
+
+    <label>Título / Nome do aluno ou turma</label>
+    <input type="text" id="dest-titulo" placeholder="Ex: Campeões da Olimpíada de Matemática"/>
+
+    <label>Turma / Série</label>
+    <input type="text" id="dest-turma" placeholder="Ex: 3º ano A"/>
+
+    <label>Descrição (o que conquistaram / por que estão em destaque)</label>
+    <textarea id="dest-descricao" placeholder="Ex: A turma 3ºA conquistou o 1º lugar na Olimpíada Estadual de Matemática..." style="min-height:120px;"></textarea>
+
+    <label>Foto (opcional)</label>
+    <label class="upload-label" id="label-dest-midia">
+      <input type="file" id="dest-midia" accept="image/*" onchange="previewDestMidia(this)"/>
+      📷 Clique para enviar uma foto
+    </label>
+    <div id="preview-dest-container" style="margin-top:12px;display:none;">
+      <img id="preview-dest-img" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;border:1px solid var(--borda);display:block;"/>
+    </div>
+
+    <div id="barra-upload-dest-container" style="margin-top:12px;display:none;">
+      <div style="background:var(--borda);height:6px;border-radius:3px;overflow:hidden;"><div id="barra-upload-dest-fill" style="height:100%;background:var(--amarelo);width:0%;transition:width .2s;"></div></div>
+      <p id="barra-upload-dest-label" style="font-size:0.8rem;color:#888;margin-top:4px;">Enviando...</p>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-primario" id="btn-salvar-destaque" onclick="salvarDestaque()">Publicar Destaque</button>
+      <button class="btn-secundario" onclick="fecharModal('modal-destaque')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ARQUIVO DE PROGRAMAÇÃO (PDF / imagem) -->
+<div class="modal-overlay" id="modal-arquivo-prog">
+  <div class="modal" style="max-width:560px;">
+    <button class="fechar-modal" onclick="fecharModal('modal-arquivo-prog')">✕</button>
+    <h2>Enviar Horário / Grade</h2>
+    <p style="color:#666;font-size:.9rem;margin-bottom:16px;">
+      Envie um PDF, imagem ou outro arquivo para exibir na aba Programação (ex: grade de horários, calendário, cronograma).
+    </p>
+
+    <label>Título do arquivo</label>
+    <input type="text" id="arquivo-prog-titulo" placeholder="Ex: Grade de Horários — 1º Semestre 2026"/>
+
+    <label>Arquivo (PDF ou imagem)</label>
+    <label class="upload-label">
+      <input type="file" id="arquivo-prog-file" accept=".pdf,image/*" onchange="previewArquivoProg(this)"/>
+      📎 Clique para selecionar PDF ou imagem
+    </label>
+    <div id="preview-arquivo-prog" style="margin-top:10px;font-size:0.9rem;color:#555;"></div>
+
+    <div id="barra-upload-prog-file-container" style="margin-top:12px;display:none;">
+      <div style="background:var(--borda);height:6px;border-radius:3px;overflow:hidden;"><div id="barra-upload-prog-file-fill" style="height:100%;background:var(--amarelo);width:0%;transition:width .2s;"></div></div>
+      <p id="barra-upload-prog-file-label" style="font-size:0.8rem;color:#888;margin-top:4px;">Enviando...</p>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-primario" id="btn-salvar-arquivo-prog" onclick="salvarArquivoProg()">Publicar Arquivo</button>
+      <button class="btn-secundario" onclick="fecharModal('modal-arquivo-prog')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ================================================================
      SUPABASE + CLOUDINARY
 ================================================================ -->
@@ -1130,6 +1313,9 @@ const SUPABASE_ANON_KEY = 'sb_publishable_RZlPWL1xp_5ufL6xck7V7A_LNpf28q3'
 
 // ── CLOUDINARY ──
 // Encontre em: Cloudinary → Settings → Upload → Upload presets (crie um "Unsigned")
+// ⚠️ IMPORTANTE PARA PDFs: No painel do Cloudinary, no preset "jornal_preset",
+//    certifique-se de que "Allowed formats" inclui "pdf" ou está vazio (aceita tudo).
+//    Isso garante que PDFs sejam aceitos via rota /image/upload.
 const CLOUDINARY_CLOUD_NAME = 'dhjm92hcs'   // ex: 'minha-escola'
 const CLOUDINARY_UPLOAD_PRESET = 'jornal_preset'    // ex: 'jornal_escolar'
 // Para exclusão de imagens: Cloudinary → Settings → API Keys
@@ -1141,96 +1327,7 @@ const CLOUDINARY_API_SECRET = 'eVQmWhfh_f0OIf6SNPyh7CY0bts'
 ================================================================ */
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-/*
-  ── ESTRUTURA DAS TABELAS NO SUPABASE ──
-  Execute no SQL Editor do Supabase para criar as tabelas:
 
-  CREATE TABLE noticias (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    titulo text NOT NULL,
-    texto text,
-    data text,
-    midia_url text,
-    midia_public_id text,
-    tipo_midia text,
-    created_at bigint DEFAULT extract(epoch from now()) * 1000
-  );
-
-  CREATE TABLE fotos (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    titulo text NOT NULL,
-    legenda text,
-    data text,
-    midia_url text,
-    midia_public_id text,
-    tipo_midia text,
-    created_at bigint DEFAULT extract(epoch from now()) * 1000
-  );
-
-  CREATE TABLE cardapio (
-    id text PRIMARY KEY,   -- 'cafe', 'almoco', 'lanche'
-    dados jsonb DEFAULT '{}'
-  );
-
-  CREATE TABLE programacao (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    titulo text NOT NULL,
-    dia text,
-    horario text,
-    desc text,
-    created_at bigint DEFAULT extract(epoch from now()) * 1000
-  );
-
-  CREATE TABLE avisos (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    titulo text NOT NULL,
-    texto text,
-    created_at bigint DEFAULT extract(epoch from now()) * 1000
-  );
-
-  CREATE TABLE configuracoes (
-    id text PRIMARY KEY,   -- ex: 'endereco', 'proposta'
-    dados jsonb DEFAULT '{}'
-  );
-
-  -- ── TABELA DE LOG DE ATIVIDADES DOS EDITORES ──
-  -- Execute este SQL no Supabase para registrar as ações dos editores:
-  ALTER TABLE materiais ADD COLUMN IF NOT EXISTS tipo text;
-  ALTER TABLE materiais ADD COLUMN IF NOT EXISTS login_editor text;
-  ALTER TABLE materiais ADD COLUMN IF NOT EXISTS acao_editor text;
-  ALTER TABLE materiais ADD COLUMN IF NOT EXISTS detalhes_editor text;
-
-  -- Para ver o log completo dos editores:
-  -- SELECT login_editor, acao_editor, detalhes_editor,
-  --        to_timestamp(created_at/1000) AS horario
-  -- FROM materiais
-  -- WHERE login_editor IS NOT NULL
-  -- ORDER BY created_at DESC;
-
-  ALTER TABLE configuracoes ENABLE ROW LEVEL SECURITY;
-  CREATE POLICY "leitura_publica" ON configuracoes FOR SELECT USING (true);
-  CREATE POLICY "escrita_publica" ON configuracoes FOR ALL USING (true);
-
-  -- Habilitar leitura pública (Row Level Security)
-  ALTER TABLE noticias ENABLE ROW LEVEL SECURITY;
-  ALTER TABLE fotos ENABLE ROW LEVEL SECURITY;
-  ALTER TABLE cardapio ENABLE ROW LEVEL SECURITY;
-  ALTER TABLE programacao ENABLE ROW LEVEL SECURITY;
-
-  CREATE POLICY "leitura_publica" ON noticias FOR SELECT USING (true);
-  CREATE POLICY "leitura_publica" ON fotos FOR SELECT USING (true);
-  CREATE POLICY "leitura_publica" ON cardapio FOR SELECT USING (true);
-  CREATE POLICY "leitura_publica" ON programacao FOR SELECT USING (true);
-
-  CREATE POLICY "escrita_publica" ON noticias FOR ALL USING (true);
-  CREATE POLICY "escrita_publica" ON fotos FOR ALL USING (true);
-  CREATE POLICY "escrita_publica" ON cardapio FOR ALL USING (true);
-  CREATE POLICY "escrita_publica" ON programacao FOR ALL USING (true);
-
-  ALTER TABLE avisos ENABLE ROW LEVEL SECURITY;
-  CREATE POLICY "leitura_publica" ON avisos FOR SELECT USING (true);
-  CREATE POLICY "escrita_publica" ON avisos FOR ALL USING (true);
-*/
 
 /* ================================================================
    CREDENCIAIS DE EDITOR
@@ -1239,7 +1336,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 const EDITORES_AUTORIZADOS = [
   { usuario: "Franco",    senha: "Bruno007"    },
   { usuario: "Morais Luiza", senha: "Analu2020"  },
-  { usuario: "Cleide",      senha: "Seduc2026" }
+  { usuario: "Cleide",      senha: "Seduc2026" },
+  { usuario: "Silvana",     senha: "Seduc2026"},
+  { usuario: "Secretariacepi",  senha:"Cepigsr"}
 ];
 
 /* ── Estado ── */
@@ -1346,6 +1445,8 @@ window.abrirLogin = function() {
     renderCardapio();
     carregarProgramacao();
     carregarReportagens();
+    carregarDestaques();
+    carregarArquivosProg();
     toast('Você saiu do modo editor.');
     return;
   }
@@ -1390,6 +1491,8 @@ window.fazerLogin = function() {
     renderCardapio();
     carregarProgramacao();
     carregarReportagens();
+    carregarDestaques();
+    carregarArquivosProg();
     toast('✅ Logado como editor!');
   } else {
     document.getElementById('erro-login').style.display = 'block';
@@ -2557,6 +2660,356 @@ supabase
   .subscribe();
 
 /* ================================================================
+   DESTAQUES — SUPABASE (tabela: destaques)
+   Campos: titulo, turma, descricao, midia_url, midia_public_id
+================================================================ */
+let destaqueEditandoId = null;
+let arquivoDestaque    = null;
+
+window.abrirModalDestaque = function(destId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem publicar destaques.'); return; }
+  destaqueEditandoId = destId || null;
+  arquivoDestaque = null;
+
+  // Reset do form
+  document.getElementById('dest-titulo').value   = '';
+  document.getElementById('dest-turma').value    = '';
+  document.getElementById('dest-descricao').value = '';
+  document.getElementById('dest-midia').value    = '';
+  document.getElementById('preview-dest-container').style.display = 'none';
+  document.getElementById('barra-upload-dest-container').style.display = 'none';
+  document.getElementById('barra-upload-dest-fill').style.width = '0%';
+  document.getElementById('btn-salvar-destaque').disabled = false;
+  document.getElementById('btn-salvar-destaque').textContent = destaqueEditandoId ? 'Salvar Alterações' : 'Publicar Destaque';
+
+  if (destaqueEditandoId) {
+    supabase.from('destaques').select('*').eq('id', destaqueEditandoId).single().then(({ data }) => {
+      if (!data) return;
+      document.getElementById('dest-titulo').value    = data.titulo    || '';
+      document.getElementById('dest-turma').value     = data.turma     || '';
+      document.getElementById('dest-descricao').value = data.descricao || '';
+      if (data.midia_url) {
+        document.getElementById('preview-dest-img').src = data.midia_url;
+        document.getElementById('preview-dest-container').style.display = 'block';
+      }
+      document.getElementById('titulo-modal-destaque').textContent = 'Editar Destaque';
+      window.abrirModal('modal-destaque');
+    });
+  } else {
+    document.getElementById('titulo-modal-destaque').textContent = 'Novo Destaque';
+    window.abrirModal('modal-destaque');
+  }
+};
+
+window.previewDestMidia = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  arquivoDestaque = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('preview-dest-img').src = e.target.result;
+    document.getElementById('preview-dest-container').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+};
+
+window.salvarDestaque = async function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem publicar destaques.'); return; }
+  const titulo    = document.getElementById('dest-titulo').value.trim();
+  const turma     = document.getElementById('dest-turma').value.trim();
+  const descricao = document.getElementById('dest-descricao').value.trim();
+  if (!titulo) { alert('Preencha o título do destaque.'); return; }
+
+  const btn = document.getElementById('btn-salvar-destaque');
+  btn.disabled = true; btn.textContent = 'Publicando...';
+
+  try {
+    let midiaUrl = null, midiaPublicId = null;
+
+    if (arquivoDestaque) {
+      const barraContainer = document.getElementById('barra-upload-dest-container');
+      const barraFill      = document.getElementById('barra-upload-dest-fill');
+      const barraLabel     = document.getElementById('barra-upload-dest-label');
+      barraContainer.style.display = 'block';
+
+      const res = await new Promise((resolve, reject) => {
+        const fd = new FormData();
+        fd.append('file', arquivoDestaque);
+        fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        fd.append('folder', 'jornal/destaques');
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`);
+        xhr.upload.onprogress = e => {
+          if (e.lengthComputable) barraFill.style.width = Math.round(e.loaded / e.total * 100) + '%';
+        };
+        xhr.onload = () => xhr.status === 200
+          ? resolve(JSON.parse(xhr.responseText))
+          : reject(new Error(JSON.parse(xhr.responseText).error?.message || 'Erro no upload'));
+        xhr.onerror = () => reject(new Error('Falha de rede.'));
+        xhr.send(fd);
+      });
+      midiaUrl      = res.secure_url;
+      midiaPublicId = res.public_id;
+      barraLabel.textContent = 'Upload concluído!';
+      barraFill.style.width  = '100%';
+    }
+
+    const item = { titulo, turma, descricao, created_at: Date.now() };
+    if (midiaUrl) { item.midia_url = midiaUrl; item.midia_public_id = midiaPublicId; }
+
+    let error;
+    if (destaqueEditandoId) {
+      if (!midiaUrl) { delete item.midia_url; delete item.midia_public_id; }
+      ({ error } = await supabase.from('destaques').update(item).eq('id', destaqueEditandoId));
+      if (!error) { toast('✅ Destaque atualizado!'); registrarAtividade('editou destaque', `"${titulo}"`); }
+    } else {
+      ({ error } = await supabase.from('destaques').insert([item]));
+      if (!error) { toast('✅ Destaque publicado!'); registrarAtividade('publicou destaque', `"${titulo}"`); }
+    }
+    if (error) throw error;
+
+    arquivoDestaque = null;
+    destaqueEditandoId = null;
+    window.fecharModal('modal-destaque');
+    await carregarDestaques();
+  } catch (err) {
+    alert('Erro ao salvar destaque: ' + (err.message || err));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Publicar Destaque';
+  }
+};
+
+window.excluirDestaque = async function(destId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir destaques.'); return; }
+  if (!confirm('Excluir este destaque?')) return;
+  try {
+    const { data: reg } = await supabase.from('destaques').select('midia_public_id,titulo').eq('id', destId).single();
+    const { error } = await supabase.from('destaques').delete().eq('id', destId);
+    if (error) throw error;
+    if (reg && reg.midia_public_id) await excluirDoCloudinary(reg.midia_public_id, 'image/jpeg');
+    toast('🗑️ Destaque excluído.'); registrarAtividade('excluiu destaque', `"${reg?.titulo || destId}"`);
+    await carregarDestaques();
+  } catch (err) { alert('Erro ao excluir: ' + err.message); }
+};
+
+async function carregarDestaques() {
+  const lista = document.getElementById('lista-destaques');
+  const { data: rows, error } = await supabase
+    .from('destaques').select('*').order('created_at', { ascending: false });
+
+  if (error) { console.error(error); return; }
+
+  if (!rows || rows.length === 0) {
+    lista.innerHTML = `<div class="vazio" style="grid-column:1/-1">
+      <span>⭐</span><p>Nenhum destaque publicado ainda.</p></div>`;
+    return;
+  }
+
+  lista.innerHTML = rows.map(d => {
+    const dataFormatada = d.created_at
+      ? new Date(d.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })
+      : '';
+    const imgHtml = d.midia_url
+      ? `<img class="destaque-card-img" src="${escapeHtml(d.midia_url)}" alt="${escapeHtml(d.titulo)}"
+             onclick="abrirLightbox('${escapeHtml(d.midia_url)}','${escapeHtml(d.titulo)}',false)">`
+      : `<div class="destaque-card-img-placeholder">⭐</div>`;
+
+    const textoId   = 'texto-dest-' + d.id;
+    const textoLongo = (d.descricao || '').length > LIMITE_TEXTO;
+    const textoHtml  = textoLongo
+      ? `<p id="${textoId}" class="texto-colapsavel recolhido">${escapeHtml(d.descricao)}</p>
+         <button class="btn-ler-mais" onclick="toggleTexto(this,'${textoId}')">▼ Ler mais</button>`
+      : `<p class="texto-colapsavel">${escapeHtml(d.descricao || '')}</p>`;
+
+    return `
+    <div class="destaque-card">
+      ${imgHtml}
+      <div class="destaque-card-corpo">
+        ${d.turma ? `<span class="destaque-turma">🏫 ${escapeHtml(d.turma)}</span>` : ''}
+        <h2>${escapeHtml(d.titulo)}</h2>
+        ${dataFormatada ? `<p class="card-data">${dataFormatada}</p>` : ''}
+        ${textoHtml}
+      </div>
+      <div class="acoes-editor" style="display:${editorLogado ? 'flex' : 'none'}">
+        <button onclick="abrirModalDestaque('${d.id}')">✏️ Editar</button>
+        <button class="excluir" onclick="excluirDestaque('${d.id}')">🗑️ Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Realtime para destaques
+supabase
+  .channel('destaques-realtime')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'destaques' }, () => carregarDestaques())
+  .subscribe();
+
+/* ================================================================
+   ARQUIVO DE PROGRAMAÇÃO — SUPABASE (tabela: programacao_arquivos)
+   Suporta PDF e imagens. Exibe viewer inline na aba Programação.
+================================================================ */
+let arquivoProgFile = null;
+
+window.abrirModalArquivoProg = function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem enviar arquivos.'); return; }
+  arquivoProgFile = null;
+  document.getElementById('arquivo-prog-titulo').value = '';
+  document.getElementById('arquivo-prog-file').value  = '';
+  document.getElementById('preview-arquivo-prog').textContent = '';
+  document.getElementById('barra-upload-prog-file-container').style.display = 'none';
+  document.getElementById('barra-upload-prog-file-fill').style.width = '0%';
+  document.getElementById('btn-salvar-arquivo-prog').disabled = false;
+  document.getElementById('btn-salvar-arquivo-prog').textContent = 'Publicar Arquivo';
+  window.abrirModal('modal-arquivo-prog');
+};
+
+window.previewArquivoProg = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  arquivoProgFile = file;
+  const prev = document.getElementById('preview-arquivo-prog');
+  prev.textContent = `📎 Selecionado: ${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+};
+
+window.salvarArquivoProg = async function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem enviar arquivos.'); return; }
+  const titulo = document.getElementById('arquivo-prog-titulo').value.trim();
+  if (!titulo) { alert('Preencha o título do arquivo.'); return; }
+  if (!arquivoProgFile) { alert('Selecione um arquivo para enviar.'); return; }
+
+  const btn = document.getElementById('btn-salvar-arquivo-prog');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+
+  try {
+    const barraContainer = document.getElementById('barra-upload-prog-file-container');
+    const barraFill      = document.getElementById('barra-upload-prog-file-fill');
+    const barraLabel     = document.getElementById('barra-upload-prog-file-label');
+    barraContainer.style.display = 'block';
+
+    // PDFs e imagens: todos sobem como 'image' no Cloudinary.
+    // O Cloudinary aceita PDF como 'image' e gera uma URL acessível publicamente.
+    // Isso evita o ERR_INVALID_RESPONSE que ocorre com uploads 'raw'.
+    const isPdf  = arquivoProgFile.type === 'application/pdf';
+    const isImg  = arquivoProgFile.type.startsWith('image/');
+    const rtCloud = 'image'; // sempre 'image' — Cloudinary aceita PDF nessa rota
+
+    const res = await new Promise((resolve, reject) => {
+      const fd = new FormData();
+      fd.append('file', arquivoProgFile);
+      fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      fd.append('folder', 'jornal/programacao');
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${rtCloud}/upload`);
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable) barraFill.style.width = Math.round(e.loaded / e.total * 100) + '%';
+      };
+      xhr.onload = () => xhr.status === 200
+        ? resolve(JSON.parse(xhr.responseText))
+        : reject(new Error(JSON.parse(xhr.responseText).error?.message || 'Erro no upload'));
+      xhr.onerror = () => reject(new Error('Falha de rede.'));
+      xhr.send(fd);
+    });
+
+    barraLabel.textContent = 'Upload concluído!';
+    barraFill.style.width  = '100%';
+
+    const item = {
+      titulo,
+      arquivo_url: res.secure_url,
+      arquivo_public_id: res.public_id,
+      tipo_arquivo: arquivoProgFile.type,
+      created_at: Date.now()
+    };
+    const { error } = await supabase.from('programacao_arquivos').insert([item]);
+    if (error) throw error;
+
+    toast('✅ Arquivo publicado!');
+    registrarAtividade('publicou arquivo programação', `"${titulo}"`);
+    arquivoProgFile = null;
+    window.fecharModal('modal-arquivo-prog');
+    await carregarArquivosProg();
+  } catch (err) {
+    alert('Erro ao enviar arquivo: ' + (err.message || err));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Publicar Arquivo';
+  }
+};
+
+window.excluirArquivoProg = async function(arquivoId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir arquivos.'); return; }
+  if (!confirm('Remover este arquivo da programação?')) return;
+  try {
+    const { data: reg } = await supabase.from('programacao_arquivos').select('arquivo_public_id,tipo_arquivo,titulo').eq('id', arquivoId).single();
+    const { error } = await supabase.from('programacao_arquivos').delete().eq('id', arquivoId);
+    if (error) throw error;
+    toast('🗑️ Arquivo removido.');
+    registrarAtividade('excluiu arquivo programação', `"${reg?.titulo || arquivoId}"`);
+    await carregarArquivosProg();
+  } catch (err) { alert('Erro: ' + err.message); }
+};
+
+async function carregarArquivosProg() {
+  const area = document.getElementById('programacao-arquivo-area');
+  const { data: rows, error } = await supabase
+    .from('programacao_arquivos').select('*').order('created_at', { ascending: false });
+
+  if (error || !rows || rows.length === 0) {
+    area.innerHTML = '';
+    return;
+  }
+
+  area.innerHTML = rows.map(arq => {
+    const isPdf = arq.tipo_arquivo === 'application/pdf';
+    const isImg = arq.tipo_arquivo && arq.tipo_arquivo.startsWith('image/');
+    const dataFormatada = arq.created_at
+      ? new Date(arq.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })
+      : '';
+
+    const viewerHtml = isPdf
+      // Google Docs Viewer: funciona em qualquer navegador/mobile, sem bloqueio do Cloudinary
+      ? `<iframe
+           class="prog-arquivo-embed"
+           src="https://docs.google.com/viewer?url=${encodeURIComponent(arq.arquivo_url)}&embedded=true"
+           title="${escapeHtml(arq.titulo)}"
+           allow="fullscreen">
+         </iframe>`
+      : isImg
+        ? `<img src="${escapeHtml(arq.arquivo_url)}" alt="${escapeHtml(arq.titulo)}"
+               style="max-width:100%;margin-top:10px;border:1px solid var(--borda);display:block;cursor:zoom-in;"
+               onclick="abrirLightbox('${escapeHtml(arq.arquivo_url)}','${escapeHtml(arq.titulo)}',false)">`
+        : '';
+
+    const excluirBtn = editorLogado
+      ? `<button class="btn-secundario so-editor" style="margin-top:8px;padding:6px 16px;border-color:#e74c3c;color:#e74c3c;"
+                onclick="excluirArquivoProg('${arq.id}')">🗑️ Remover</button>`
+      : '';
+
+    // Para PDFs: monta URL de download direto pelo Cloudinary (fl_attachment)
+    // Troca /upload/ por /upload/fl_attachment/ na URL para forçar download
+    const urlDownload = isPdf
+      ? arq.arquivo_url.replace('/upload/', '/upload/fl_attachment/')
+      : arq.arquivo_url;
+
+    return `
+    <div style="margin-bottom:32px;">
+      <p style="font-family:var(--fonte-titulo);font-size:1.2rem;color:#1a1a2e;margin-bottom:4px;">${escapeHtml(arq.titulo)}</p>
+      ${dataFormatada ? `<p style="font-size:0.8rem;color:#aaa;margin-bottom:8px;">${dataFormatada}</p>` : ''}
+      <a class="prog-arquivo" href="${escapeHtml(urlDownload)}" target="_blank" rel="noopener">
+        ${isPdf ? '📄' : isImg ? '🖼️' : '📎'} ${isPdf ? 'Baixar PDF' : 'Abrir / Baixar'} — ${escapeHtml(arq.titulo)}
+      </a>
+      ${viewerHtml}
+      ${excluirBtn}
+    </div>`;
+  }).join('');
+}
+
+// Realtime para arquivos de programação
+supabase
+  .channel('prog-arquivos-realtime')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'programacao_arquivos' }, () => carregarArquivosProg())
+  .subscribe();
+
+/* ================================================================
    INICIALIZAÇÃO
 ================================================================ */
 async function init() {
@@ -2568,6 +3021,8 @@ async function init() {
       carregarFotos(),
       carregarCardapio(),
       carregarProgramacao(),
+      carregarArquivosProg(),
+      carregarDestaques(),
       carregarProposta(),
       carregarAvisos()
     ]);
