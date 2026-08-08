@@ -1020,7 +1020,7 @@
     </div>
     <p id="erro-login">❌ Usuário ou senha incorretos.</p>
     <div class="modal-btns">
-      <button class="btn-primario" onclick="fazerLogin()">Entrar</button>
+      <button class="btn-primario" id="btn-fazer-login" onclick="fazerLogin()">Entrar</button>
       <button class="btn-secundario" onclick="fecharModal('modal-login')">Cancelar</button>
     </div>
   </div>
@@ -1318,28 +1318,25 @@ const SUPABASE_ANON_KEY = 'sb_publishable_RZlPWL1xp_5ufL6xck7V7A_LNpf28q3'
 //    Isso garante que PDFs sejam aceitos via rota /image/upload.
 const CLOUDINARY_CLOUD_NAME = 'dhjm92hcs'   // ex: 'minha-escola'
 const CLOUDINARY_UPLOAD_PRESET = 'jornal_preset'    // ex: 'jornal_escolar'
-// Para exclusão de imagens: Cloudinary → Settings → API Keys
-const CLOUDINARY_API_KEY    = '972156728474352'
-const CLOUDINARY_API_SECRET = 'eVQmWhfh_f0OIf6SNPyh7CY0bts'
+// ⚠️ A API_KEY pública do Cloudinary pode ficar no navegador (ela sozinha não faz nada).
+// A API_SECRET NUNCA pode ficar aqui — por isso foi removida. Veja LEIA-ME_SEGURANCA.md.
+const CLOUDINARY_API_KEY = '972156728474352'
 
 /* ================================================================
    INICIALIZAÇÃO DO SUPABASE
 ================================================================ */
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-
-
 /* ================================================================
-   CREDENCIAIS DE EDITOR
-   Adicione ou remova editores aqui.
+   LOGIN DE EDITOR — agora via Supabase Auth (não há mais senhas
+   no código). Cada editor tem uma conta criada no painel do
+   Supabase (Authentication → Users). O "usuário" digitado aqui é
+   convertido para o e-mail interno correspondente.
+   Veja LEIA-ME_SEGURANCA.md para o passo a passo de criação das contas.
 ================================================================ */
-const EDITORES_AUTORIZADOS = [
-  { usuario: "Franco",    senha: "Bruno007"    },
-  { usuario: "Morais Luiza", senha: "Analu2020"  },
-  { usuario: "Cleide",      senha: "Seduc2026" },
-  { usuario: "Silvana",     senha: "Seduc2026"},
-  { usuario: "Secretariacepi",  senha:"Cepigsr"}
-];
+function usuarioParaEmail(usuario) {
+  return usuario.trim().toLowerCase().replace(/\s+/g, '') + '@editores.jornalgsr.local';
+}
 
 /* ── Estado ── */
 let editorLogado = false;
@@ -1430,9 +1427,10 @@ window.trocarAba = function(id, btn) {
 /* ================================================================
    LOGIN
 ================================================================ */
-window.abrirLogin = function() {
+window.abrirLogin = async function() {
   if (editorLogado) {
     registrarAtividade('logout', 'Saiu do modo editor');
+    await supabase.auth.signOut();
     editorLogado = false;
     nomeEditor = '';
     document.getElementById('btn-login-topo').textContent = 'Entrar como Editor';
@@ -1467,37 +1465,66 @@ window.alternarSenha = function() {
   }
 };
 
-window.fazerLogin = function() {
+window.fazerLogin = async function() {
   const usuario = document.getElementById('campo-usuario').value.trim();
   const senha   = document.getElementById('campo-senha').value;
-  const ok = EDITORES_AUTORIZADOS.find(e => e.usuario === usuario && e.senha === senha);
-  if (ok) {
+  const btnEntrar = document.getElementById('btn-fazer-login');
+  if (btnEntrar) { btnEntrar.disabled = true; btnEntrar.textContent = 'Entrando...'; }
+
+  // A verificação agora acontece no servidor do Supabase — a senha nunca
+  // é comparada no navegador nem existe em texto no código.
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: usuarioParaEmail(usuario),
+    password: senha
+  });
+
+  if (btnEntrar) { btnEntrar.disabled = false; btnEntrar.textContent = 'Entrar'; }
+
+  if (error || !data.session) {
+    document.getElementById('erro-login').style.display = 'block';
+    return;
+  }
+
+  editorLogado = true;
+  nomeEditor = usuario;
+  registrarAtividade('login', 'Entrou no modo editor');
+  window.fecharModal('modal-login');
+  document.getElementById('campo-usuario').value = '';
+  document.getElementById('campo-senha').value   = '';
+  document.getElementById('campo-senha').type    = 'password';
+  document.getElementById('btn-ver-senha').textContent = '👁️';
+  document.getElementById('erro-login').style.display = 'none';
+  document.getElementById('btn-login-topo').textContent = 'Sair do Editor';
+  document.getElementById('status-editor').style.display = 'inline';
+  document.getElementById('fab').style.display = 'flex';
+  document.getElementById('btn-trocar-fundo').style.display = 'inline-block';
+  document.querySelectorAll('.acoes-editor').forEach(e => e.style.display = 'flex');
+  document.querySelectorAll('.so-editor:not(.acoes-editor)').forEach(e => e.style.display = 'block');
+  // Re-renderizar cardápio e programação para exibir botões de excluir
+  renderCardapio();
+  carregarProgramacao();
+  carregarReportagens();
+  carregarDestaques();
+  carregarArquivosProg();
+  toast('✅ Logado como editor!');
+};
+
+/* Restaura a sessão do editor se ele já tinha feito login antes
+   (o Supabase Auth guarda a sessão com segurança, ao contrário do
+   antigo sistema que "esquecia" o login a cada F5). */
+async function restaurarSessaoEditor() {
+  const { data } = await supabase.auth.getSession();
+  if (data.session) {
     editorLogado = true;
-    nomeEditor = ok.usuario;
-    registrarAtividade('login', 'Entrou no modo editor');
-    window.fecharModal('modal-login');
-    document.getElementById('campo-usuario').value = '';
-    document.getElementById('campo-senha').value   = '';
-    document.getElementById('campo-senha').type    = 'password';
-    document.getElementById('btn-ver-senha').textContent = '👁️';
-    document.getElementById('erro-login').style.display = 'none';
+    nomeEditor = data.session.user.email.split('@')[0];
     document.getElementById('btn-login-topo').textContent = 'Sair do Editor';
     document.getElementById('status-editor').style.display = 'inline';
     document.getElementById('fab').style.display = 'flex';
     document.getElementById('btn-trocar-fundo').style.display = 'inline-block';
     document.querySelectorAll('.acoes-editor').forEach(e => e.style.display = 'flex');
     document.querySelectorAll('.so-editor:not(.acoes-editor)').forEach(e => e.style.display = 'block');
-    // Re-renderizar cardápio e programação para exibir botões de excluir
-    renderCardapio();
-    carregarProgramacao();
-    carregarReportagens();
-    carregarDestaques();
-    carregarArquivosProg();
-    toast('✅ Logado como editor!');
-  } else {
-    document.getElementById('erro-login').style.display = 'block';
   }
-};
+}
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('modal-login').classList.contains('aberto')) {
@@ -1631,14 +1658,78 @@ window.removerMidiaRep = function() {
 
 /* ================================================================
    UPLOAD PARA CLOUDINARY
+   Vídeos grandes (acima de CHUNK_LIMITE) são enviados em pedaços
+   ("chunked upload"), que é o método oficial do Cloudinary para
+   arquivos grandes — evita timeout/falha no meio do envio de
+   vídeos longos, principalmente em conexões móveis.
+   Ids da barra de progresso podem ser customizados (3º parâmetro)
+   para reaproveitar esta função em outros formulários do site.
 ================================================================ */
-async function uploadArquivo(arquivo, pasta) {
-  const barraContainer = document.getElementById('barra-upload-container');
-  const barraFill      = document.getElementById('barra-upload-fill');
-  const barraLabel     = document.getElementById('barra-upload-label');
-  barraContainer.style.display = 'block';
-  barraLabel.textContent = 'Enviando...';
+const CHUNK_TAMANHO = 6 * 1024 * 1024;   // 6MB por pedaço
+const CHUNK_LIMITE  = 20 * 1024 * 1024;  // acima disso, usa upload em pedaços
 
+async function uploadArquivo(arquivo, pasta, barraIds) {
+  const ids = barraIds || {
+    container: 'barra-upload-container',
+    fill:      'barra-upload-fill',
+    label:     'barra-upload-label'
+  };
+  const barraContainer = document.getElementById(ids.container);
+  const barraFill      = document.getElementById(ids.fill);
+  const barraLabel     = document.getElementById(ids.label);
+  if (barraContainer) barraContainer.style.display = 'block';
+  if (barraLabel) barraLabel.textContent = 'Enviando...';
+
+  const resourceType = arquivo.type.startsWith('video') ? 'video' : 'image';
+
+  const atualizarProgresso = pct => {
+    if (barraFill)  barraFill.style.width = pct + '%';
+    if (barraLabel) barraLabel.textContent = `Enviando... ${pct}%`;
+  };
+
+  // Vídeo grande → upload em pedaços (chunked)
+  if (resourceType === 'video' && arquivo.size > CHUNK_LIMITE) {
+    const uploadId = 'jornal-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+    const totalChunks = Math.ceil(arquivo.size / CHUNK_TAMANHO);
+    let ultimoResultado = null;
+
+    for (let i = 0; i < totalChunks; i++) {
+      const inicio = i * CHUNK_TAMANHO;
+      const fim = Math.min(inicio + CHUNK_TAMANHO, arquivo.size);
+      const pedaco = arquivo.slice(inicio, fim);
+
+      ultimoResultado = await new Promise((resolve, reject) => {
+        const fd = new FormData();
+        fd.append('file', pedaco);
+        fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        fd.append('folder', `jornal/${pasta}`);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`);
+        xhr.setRequestHeader('X-Unique-Upload-Id', uploadId);
+        xhr.setRequestHeader('Content-Range', `bytes ${inicio}-${fim - 1}/${arquivo.size}`);
+        xhr.upload.onprogress = e => {
+          if (e.lengthComputable) {
+            const enviadoTotal = inicio + e.loaded;
+            atualizarProgresso(Math.round((enviadoTotal / arquivo.size) * 100));
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status === 200 || xhr.status === 201) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            try { reject(new Error(JSON.parse(xhr.responseText).error?.message || 'Erro no upload')); }
+            catch { reject(new Error('Erro no upload do vídeo (pedaço ' + (i + 1) + '/' + totalChunks + ')')); }
+          }
+        };
+        xhr.onerror = () => reject(new Error('Falha de rede ao fazer upload.'));
+        xhr.send(fd);
+      });
+    }
+    if (barraLabel) barraLabel.textContent = 'Upload concluído!';
+    return { url: ultimoResultado.secure_url, path: ultimoResultado.public_id };
+  }
+
+  // Arquivo normal (imagem, ou vídeo pequeno) → upload único
   return new Promise((resolve, reject) => {
     const formData = new FormData();
     formData.append('file', arquivo);
@@ -1646,21 +1737,16 @@ async function uploadArquivo(arquivo, pasta) {
     formData.append('folder', `jornal/${pasta}`);
 
     const xhr = new XMLHttpRequest();
-    const resourceType = arquivo.type.startsWith('video') ? 'video' : 'image';
     xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`);
 
     xhr.upload.onprogress = e => {
-      if (e.lengthComputable) {
-        const pct = Math.round((e.loaded / e.total) * 100);
-        barraFill.style.width = pct + '%';
-        barraLabel.textContent = `Enviando... ${pct}%`;
-      }
+      if (e.lengthComputable) atualizarProgresso(Math.round((e.loaded / e.total) * 100));
     };
 
     xhr.onload = () => {
       if (xhr.status === 200) {
         const res = JSON.parse(xhr.responseText);
-        barraLabel.textContent = 'Upload concluído!';
+        if (barraLabel) barraLabel.textContent = 'Upload concluído!';
         resolve({ url: res.secure_url, path: res.public_id });
       } else {
         const err = JSON.parse(xhr.responseText);
@@ -1674,39 +1760,24 @@ async function uploadArquivo(arquivo, pasta) {
 }
 
 /* ================================================================
-   EXCLUIR ARQUIVO DO CLOUDINARY (com assinatura SHA-1)
+   EXCLUIR ARQUIVO DO CLOUDINARY
+   ⚠️ A exclusão assinada (SHA-1) foi REMOVIDA daqui de propósito:
+   ela exigia a API_SECRET do Cloudinary dentro do código do site,
+   e qualquer pessoa que abrisse o "Inspecionar" do navegador podia
+   copiar essa chave e apagar ou adulterar QUALQUER arquivo da conta
+   Cloudinary da escola — não só os deste site.
+   Uma assinatura só pode ser gerada com segurança em um servidor
+   (ex.: uma Supabase Edge Function), nunca no navegador do usuário.
+   Por isso, ao excluir uma notícia/foto/reportagem, o site agora
+   remove o registro do banco de dados normalmente, mas o arquivo de
+   mídia correspondente fica "órfão" no Cloudinary (não é apagado lá).
+   Veja LEIA-ME_SEGURANCA.md para a opção de criar uma Edge Function
+   gratuita que apaga esses arquivos com segurança, e para instruções
+   de limpeza manual periódica pela Media Library do Cloudinary.
 ================================================================ */
 async function excluirDoCloudinary(publicId, tipoMidia) {
-  if (!CLOUDINARY_API_KEY || CLOUDINARY_API_KEY === 'COLOQUE_SUA_API_KEY_AQUI') return;
-  try {
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-    const resourceType = (tipoMidia && tipoMidia.startsWith('video')) ? 'video' : 'image';
-    const strToSign = `public_id=${publicId}&timestamp=${timestamp}${CLOUDINARY_API_SECRET}`;
-
-    // Gera assinatura SHA-1 via Web Crypto API
-    const encoder = new TextEncoder();
-    const data = encoder.encode(strToSign);
-    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    const formData = new FormData();
-    formData.append('public_id', publicId);
-    formData.append('timestamp', timestamp);
-    formData.append('api_key', CLOUDINARY_API_KEY);
-    formData.append('signature', signature);
-
-    const resp = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/destroy`,
-      { method: 'POST', body: formData }
-    );
-    const result = await resp.json();
-    if (result.result !== 'ok') {
-      console.warn('Cloudinary não removeu o arquivo:', result);
-    }
-  } catch (e) {
-    console.warn('Erro ao excluir do Cloudinary:', e.message);
-  }
+  if (!publicId) return;
+  console.info('[jornal] Arquivo mantido no Cloudinary (exclusão remota desativada por segurança):', publicId);
 }
 
 /* ================================================================
@@ -1812,24 +1883,8 @@ window.salvarPublicacao = async function() {
           const arquivo = arquivosPub[i];
           barraLabel.textContent = `Enviando ${i + 1} de ${total}...`;
           barraFill.style.width  = '0%';
-          const res = await new Promise((resolve, reject) => {
-            const fd = new FormData();
-            fd.append('file', arquivo);
-            fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            fd.append('folder', 'jornal/noticias');
-            const xhr = new XMLHttpRequest();
-            const rt  = arquivo.type.startsWith('video') ? 'video' : 'image';
-            xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${rt}/upload`);
-            xhr.upload.onprogress = e => {
-              if (e.lengthComputable) barraFill.style.width = Math.round(e.loaded / e.total * 100) + '%';
-            };
-            xhr.onload = () => xhr.status === 200
-              ? resolve(JSON.parse(xhr.responseText))
-              : reject(new Error(JSON.parse(xhr.responseText).error?.message || 'Erro no upload'));
-            xhr.onerror = () => reject(new Error('Falha de rede ao fazer upload.'));
-            xhr.send(fd);
-          });
-          midiasNovas.push({ url: res.secure_url, public_id: res.public_id, tipo: arquivo.type });
+          const res = await uploadArquivo(arquivo, 'noticias');
+          midiasNovas.push({ url: res.url, public_id: res.path, tipo: arquivo.type });
         }
         barraLabel.textContent = 'Upload concluído!';
         barraFill.style.width  = '100%';
@@ -1874,32 +1929,14 @@ window.salvarPublicacao = async function() {
           barraLabel.textContent = `Enviando ${i + 1} de ${total}...`;
           barraFill.style.width  = '0%';
 
-          // Upload individual com progresso
-          const res = await new Promise((resolve, reject) => {
-            const fd = new FormData();
-            fd.append('file', arquivo);
-            fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            fd.append('folder', 'jornal/fotos');
-            const xhr = new XMLHttpRequest();
-            const rt  = arquivo.type.startsWith('video') ? 'video' : 'image';
-            xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${rt}/upload`);
-            xhr.upload.onprogress = e => {
-              if (e.lengthComputable) {
-                barraFill.style.width = Math.round(e.loaded / e.total * 100) + '%';
-              }
-            };
-            xhr.onload = () => xhr.status === 200
-              ? resolve(JSON.parse(xhr.responseText))
-              : reject(new Error(JSON.parse(xhr.responseText).error?.message || 'Erro no upload'));
-            xhr.onerror = () => reject(new Error('Falha de rede ao fazer upload.'));
-            xhr.send(fd);
-          });
+          // Upload individual com progresso (suporta vídeos longos)
+          const res = await uploadArquivo(arquivo, 'fotos');
 
           // Título com sufixo se múltiplos
           const tituloItem = total > 1 ? `${titulo} (${i + 1}/${total})` : titulo;
           const item = {
             tipo, titulo: tituloItem, legenda, data: dataFormatada, created_at: Date.now() + i,
-            midia_url: res.secure_url, midia_public_id: res.public_id, tipo_midia: arquivo.type
+            midia_url: res.url, midia_public_id: res.path, tipo_midia: arquivo.type
           };
           const { error } = await supabase.from(tabela).insert([item]);
           if (error) throw error;
@@ -2267,27 +2304,12 @@ window.salvarReportagem = async function() {
         const arquivo = arquivosRep[i];
         barraLabel.textContent = `Enviando ${i + 1} de ${arquivosRep.length}...`;
         barraFill.style.width  = '0%';
-        const res = await new Promise((resolve, reject) => {
-          const fd = new FormData();
-          fd.append('file', arquivo);
-          fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-          fd.append('folder', 'jornal/reportagens');
-          const xhr = new XMLHttpRequest();
-          const rt  = arquivo.type.startsWith('video') ? 'video' : 'image';
-          xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${rt}/upload`);
-          xhr.upload.onprogress = e => {
-            if (e.lengthComputable) {
-              barraFill.style.width = Math.round(e.loaded / e.total * 100) + '%';
-              barraLabel.textContent = `Enviando ${i + 1}/${arquivosRep.length}... ${Math.round(e.loaded / e.total * 100)}%`;
-            }
-          };
-          xhr.onload = () => xhr.status === 200
-            ? resolve(JSON.parse(xhr.responseText))
-            : reject(new Error(JSON.parse(xhr.responseText).error?.message || 'Erro no upload'));
-          xhr.onerror = () => reject(new Error('Falha de rede ao fazer upload.'));
-          xhr.send(fd);
+        const res = await uploadArquivo(arquivo, 'reportagens', {
+          container: 'barra-upload-rep-container',
+          fill:      'barra-upload-rep-fill',
+          label:     'barra-upload-rep-label'
         });
-        midiasNovas.push({ url: res.secure_url, public_id: res.public_id, tipo: arquivo.type });
+        midiasNovas.push({ url: res.url, public_id: res.path, tipo: arquivo.type });
       }
       barraLabel.textContent = 'Upload concluído!';
       barraFill.style.width  = '100%';
@@ -3014,6 +3036,7 @@ supabase
 ================================================================ */
 async function init() {
   try {
+    await restaurarSessaoEditor();
     await Promise.all([
       carregarHero(),
       carregarNoticias(),
