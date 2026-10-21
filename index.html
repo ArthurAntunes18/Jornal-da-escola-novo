@@ -505,6 +505,65 @@
     #bloco-endereco a { color: #888; text-decoration: none; }
     #bloco-endereco a:hover { color: #d4a800; }
 
+    /* ── PODCAST ── */
+    .pod-filtros {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px;
+    }
+    .pod-filtro {
+      background: #fff; border: 2px solid var(--borda); color: #555;
+      padding: 8px 18px; border-radius: 999px;
+      font-family: var(--fonte-corpo); font-size: 0.92rem; font-weight: 700;
+      cursor: pointer; transition: background .2s, border-color .2s, color .2s;
+    }
+    .pod-filtro:hover { border-color: var(--amarelo); color: #1a1a2e; }
+    .pod-filtro.ativo { background: var(--amarelo); border-color: var(--amarelo); color: #1a1a2e; }
+    .pod-dropdown { position: relative; }
+    .pod-seta { display: inline-block; transition: transform .2s; margin-left: 4px; }
+    .pod-dropdown.aberto .pod-seta { transform: rotate(180deg); }
+    .pod-dropdown-menu {
+      display: none; position: absolute; top: calc(100% + 8px); left: 0;
+      min-width: 220px; background: #fff; border: 2px solid var(--borda);
+      border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.15);
+      z-index: 50; padding: 6px; max-height: 60vh; overflow-y: auto;
+    }
+    .pod-dropdown.aberto .pod-dropdown-menu { display: block; }
+    .pod-dropdown-menu button {
+      display: block; width: 100%; text-align: left; background: transparent;
+      border: none; padding: 10px 14px; border-radius: 8px;
+      font-family: var(--fonte-corpo); font-size: 0.95rem; font-weight: 600;
+      color: #1a1a2e; cursor: pointer; text-transform: uppercase; letter-spacing: .5px;
+    }
+    .pod-dropdown-menu button:hover { background: #fff6cc; }
+    .pod-dropdown-menu button.ativo { background: var(--amarelo); }
+    .pod-card {
+      background: #fff; border: 1px solid var(--borda);
+      overflow: hidden; transition: transform .2s, border-color .2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      display: flex; flex-direction: column;
+    }
+    .pod-card:hover { transform: translateY(-4px); border-color: var(--amarelo); }
+    .pod-card-img { width: 100%; height: 220px; object-fit: cover; display: block; cursor: zoom-in; }
+    .pod-card-img-placeholder {
+      width: 100%; height: 220px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #3a3a5e 100%);
+      display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
+    }
+    .pod-card-corpo { padding: 20px; flex: 1; }
+    .pod-card-corpo h2 {
+      font-family: var(--fonte-titulo); font-size: 1.3rem;
+      color: #1a1a2e; margin: 8px 0; word-break: break-word; overflow-wrap: break-word;
+    }
+    .pod-card-corpo p { color: #555; font-size: 1rem; }
+    .pod-materia {
+      display: inline-block; background: var(--amarelo); color: #1a1a2e;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; padding: 2px 10px;
+    }
+    .pod-meta { font-size: 0.85rem; color: #777; margin-top: 2px; }
+    .pod-audio { padding: 0 20px 20px; }
+    .pod-audio audio { width: 100%; display: block; }
+    .pod-sem-audio { color: #999; font-style: italic; font-size: 0.9rem; padding: 0 20px 20px; }
+
     /* ── ABA MAIS / PROPOSTA PEDAGÓGICA ── */
     .proposta-bloco {
       background: #ffffff;
@@ -838,6 +897,7 @@
   <button class="ativa" onclick="trocarAba('jornal', this)">📰 Notícias</button>
   <button onclick="trocarAba('reportagem', this)">🔍 Reportagem</button>
   <button onclick="trocarAba('cardapio', this)">🍽️ Cardápio</button>
+  <button onclick="trocarAba('podcast', this)">🎙️ PodCast</button>
   <button onclick="trocarAba('programacao', this)">📅 Programação</button>
   <button onclick="trocarAba('avisos', this)">🔔 Avisos</button>
   <button onclick="trocarAba('destaques', this)">⭐ Destaques</button>
@@ -945,6 +1005,22 @@
       <div class="vazio" style="grid-column:1/-1">
         <span>⭐</span>
         <p>Nenhum destaque publicado ainda.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ABA PODCAST ─── -->
+  <section id="aba-podcast" class="aba">
+    <h2 class="secao-titulo">PodCast</h2>
+    <div class="pod-filtros" id="pod-filtros"></div>
+    <button class="btn-primario so-editor" onclick="abrirModalPodcast()"
+            style="display:none;max-width:280px;margin-bottom:32px;">
+      🎙️ Novo Episódio
+    </button>
+    <div class="grid" id="lista-podcasts">
+      <div class="vazio" style="grid-column:1/-1">
+        <span>🎙️</span>
+        <p>Carregando episódios...</p>
       </div>
     </div>
   </section>
@@ -1265,6 +1341,55 @@
   </div>
 </div>
 
+<!-- MODAL PODCAST -->
+<div class="modal-overlay" id="modal-podcast">
+  <div class="modal" style="max-width:600px;">
+    <button class="fechar-modal" onclick="fecharModal('modal-podcast')">✕</button>
+    <h2 id="titulo-modal-podcast">Novo Episódio</h2>
+
+    <label>Título do episódio</label>
+    <input type="text" id="pod-titulo" placeholder="Ex: Entrevista com a professora de Matemática"/>
+
+    <label>Matéria / Categoria</label>
+    <select id="pod-materia"></select>
+
+    <label>Entrevistador(es)</label>
+    <input type="text" id="pod-entrevistador" placeholder="Ex: Maria Silva, João Souza"/>
+
+    <label>Data da gravação</label>
+    <input type="date" id="pod-data"/>
+
+    <label>Descrição</label>
+    <textarea id="pod-descricao" placeholder="Sobre o que é este episódio..." style="min-height:110px;"></textarea>
+
+    <label>Foto de capa</label>
+    <label class="upload-label">
+      <input type="file" id="pod-foto" accept="image/*" onchange="previewPodFoto(this)"/>
+      <span id="pod-foto-txt">📷 Clique para enviar a foto</span>
+    </label>
+    <div id="preview-pod-foto-container" style="margin-top:12px;display:none;">
+      <img id="preview-pod-foto" alt="Preview" style="max-width:100%;max-height:200px;object-fit:cover;border:1px solid var(--borda);display:block;"/>
+    </div>
+
+    <label>Áudio da gravação</label>
+    <label class="upload-label">
+      <input type="file" id="pod-audio" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac" onchange="previewPodAudio(this)"/>
+      <span id="pod-audio-txt">🎧 Clique para enviar o áudio (opcional)</span>
+    </label>
+    <audio id="preview-pod-audio" controls style="width:100%;margin-top:12px;display:none;"></audio>
+
+    <div id="barra-upload-pod-container" style="margin-top:12px;display:none;">
+      <div style="background:var(--borda);height:6px;border-radius:3px;overflow:hidden;"><div id="barra-upload-pod-fill" style="height:100%;background:var(--amarelo);width:0%;transition:width .2s;"></div></div>
+      <p id="barra-upload-pod-label" style="font-size:0.8rem;color:#888;margin-top:4px;">Enviando...</p>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-primario" id="btn-salvar-podcast" onclick="salvarPodcast()">Publicar Episódio</button>
+      <button class="btn-secundario" onclick="fecharModal('modal-podcast')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL ARQUIVO DE PROGRAMAÇÃO (PDF / imagem) -->
 <div class="modal-overlay" id="modal-arquivo-prog">
   <div class="modal" style="max-width:560px;">
@@ -1350,7 +1475,7 @@ let cardapio     = {};   // cache local do cardápio
 /* ── Registro de atividade do editor ── */
 async function registrarAtividade(acao, detalhes = '') {
   try {
-    await supabase.from('materiais').insert([{
+    await supabase.from('atividades').insert([{
       tipo: '_log',
       login_editor: nomeEditor,
       acao_editor:  acao,
@@ -1447,6 +1572,7 @@ window.abrirLogin = function() {
     carregarReportagens();
     carregarDestaques();
     carregarArquivosProg();
+    carregarPodcasts();
     toast('Você saiu do modo editor.');
     return;
   }
@@ -1493,6 +1619,7 @@ window.fazerLogin = function() {
     carregarReportagens();
     carregarDestaques();
     carregarArquivosProg();
+    carregarPodcasts();
     toast('✅ Logado como editor!');
   } else {
     document.getElementById('erro-login').style.display = 'block';
@@ -3010,6 +3137,388 @@ supabase
   .subscribe();
 
 /* ================================================================
+   PODCAST — SUPABASE (reutiliza a tabela existente "materiais",
+   com tipo = 'podcast'. Nenhuma tabela/coluna nova é necessária.)
+   Mapeamento dos campos:
+     titulo      → título do episódio
+     texto       → descrição
+     autor       → entrevistador(es)
+     legenda     → matéria/categoria (id)
+     data        → data da gravação (texto formatado)
+     midia_url   → JSON { foto:{url,public_id}, audio:{url,public_id} }
+================================================================ */
+// ↓ Para criar/remover categorias, edite apenas esta lista ↓
+const MATERIAS_POD = [
+  { id: 'geral',      nome: 'Gerais' },
+  { id: 'portugues',  nome: 'Língua Portuguesa' },
+  { id: 'matematica', nome: 'Matemática' },
+  { id: 'geografia',  nome: 'Geografia' },
+  { id: 'historia',   nome: 'História' },
+  { id: 'edfisica',   nome: 'Educação Física' },
+  { id: 'artes',      nome: 'Arte' },
+  { id: 'biologia',   nome: 'Biologia' },
+  { id: 'quimica',    nome: 'Química' },
+  { id: 'fisica',     nome: 'Física' },
+  { id: 'filosofia',  nome: 'Filosofia' },
+  { id: 'sociologia', nome: 'Sociologia' },
+  { id: 'ingles',     nome: 'Língua Inglesa' }
+];
+// Categorias antigas: só para exibir o nome de episódios já publicados
+const MATERIAS_POD_ANTIGAS = [
+  { id: 'ciencias', nome: 'Ciências' },
+  { id: 'outras',   nome: 'Outras' }
+];
+
+let podcastsCache   = [];
+let podcastFiltro   = 'geral';
+let podEditandoId   = null;
+let podFotoFile     = null;
+let podAudioFile    = null;
+
+function nomeMateriaPod(id) {
+  const m = MATERIAS_POD.concat(MATERIAS_POD_ANTIGAS).find(x => x.id === id);
+  return m ? m.nome : 'Gerais';
+}
+
+function lerMidiaPod(row) {
+  try {
+    const o = JSON.parse(row.midia_url);
+    if (o && typeof o === 'object' && !Array.isArray(o)) return o;
+  } catch {}
+  return {};
+}
+
+function renderFiltrosPod() {
+  const el = document.getElementById('pod-filtros');
+  if (!el) return;
+  const materias = MATERIAS_POD.filter(m => m.id !== 'geral');
+  const materiaAtiva = materias.some(m => m.id === podcastFiltro);
+  el.innerHTML =
+    `<button class="pod-filtro${podcastFiltro === 'geral' ? ' ativo' : ''}" onclick="filtrarPodcast('geral')">Gerais</button>` +
+    `<div class="pod-dropdown" id="pod-dropdown">
+       <button type="button" class="pod-filtro pod-dropdown-btn${materiaAtiva ? ' ativo' : ''}" onclick="toggleMateriasPod(event)">
+         ${materiaAtiva ? escapeHtml(nomeMateriaPod(podcastFiltro)) : 'Matérias'} <span class="pod-seta">▾</span>
+       </button>
+       <div class="pod-dropdown-menu">
+         ${materias.map(m => `<button type="button" class="${m.id === podcastFiltro ? 'ativo' : ''}" onclick="filtrarPodcast('${m.id}')">${escapeHtml(m.nome)}</button>`).join('')}
+       </div>
+     </div>`;
+}
+
+window.toggleMateriasPod = function(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('pod-dropdown');
+  if (dd) dd.classList.toggle('aberto');
+};
+
+document.addEventListener('click', e => {
+  const dd = document.getElementById('pod-dropdown');
+  if (dd && !dd.contains(e.target)) dd.classList.remove('aberto');
+});
+
+window.filtrarPodcast = function(id) {
+  podcastFiltro = id;
+  renderFiltrosPod();
+  renderPodcasts();
+};
+
+async function carregarPodcasts() {
+  const lista = document.getElementById('lista-podcasts');
+  if (!lista) return;
+  const { data: rows, error } = await supabase
+    .from('materiais')
+    .select('*')
+    .eq('tipo', 'podcast')
+    .order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  podcastsCache = rows || [];
+  renderFiltrosPod();
+  renderPodcasts();
+}
+
+function renderPodcasts() {
+  const lista = document.getElementById('lista-podcasts');
+  if (!lista) return;
+  const rows = podcastFiltro === 'geral'
+    ? podcastsCache // "Gerais" mostra todos os episódios
+    : podcastsCache.filter(r => (r.legenda || 'geral') === podcastFiltro);
+
+  if (rows.length === 0) {
+    lista.innerHTML = `
+      <div class="vazio" style="grid-column:1/-1">
+        <span>🎙️</span>
+        <p>${podcastFiltro === 'geral' ? 'Nenhum episódio publicado ainda.' : 'Nenhum episódio em "' + escapeHtml(nomeMateriaPod(podcastFiltro)) + '" ainda.'}</p>
+      </div>`;
+    return;
+  }
+
+  lista.innerHTML = rows.map(r => {
+    const midia = lerMidiaPod(r);
+    const titulo = escapeHtml(r.titulo);
+    const imgHtml = midia.foto && midia.foto.url
+      ? `<img class="pod-card-img" src="${escapeHtml(midia.foto.url)}" alt="${titulo}"
+             onclick="abrirLightbox('${escapeHtml(midia.foto.url)}','${titulo}',false)">`
+      : `<div class="pod-card-img-placeholder">🎙️</div>`;
+    const audioHtml = midia.audio && midia.audio.url
+      ? `<div class="pod-audio"><audio controls preload="none" src="${escapeHtml(midia.audio.url)}"></audio></div>`
+      : `<p class="pod-sem-audio">🎧 Áudio em breve</p>`;
+
+    const textoId = 'texto-pod-' + r.id;
+    const textoLongo = (r.texto || '').length > LIMITE_TEXTO;
+    const textoHtml = textoLongo
+      ? `<p id="${textoId}" class="texto-colapsavel recolhido">${escapeHtml(r.texto)}</p>
+         <button class="btn-ler-mais" onclick="toggleTexto(this,'${textoId}')">▼ Ler mais</button>`
+      : `<p class="texto-colapsavel">${escapeHtml(r.texto || '')}</p>`;
+
+    return `
+    <article class="pod-card">
+      ${imgHtml}
+      <div class="pod-card-corpo">
+        <span class="pod-materia">${escapeHtml(nomeMateriaPod(r.legenda || 'geral'))}</span>
+        <h2>${titulo}</h2>
+        ${r.data ? `<p class="pod-meta">📅 ${escapeHtml(r.data)}</p>` : ''}
+        ${r.autor ? `<p class="pod-meta">🎤 Entrevistador(es): ${escapeHtml(r.autor)}</p>` : ''}
+        <div style="margin-top:10px;">${textoHtml}</div>
+      </div>
+      ${audioHtml}
+      <div class="acoes-editor" style="display:${editorLogado ? 'flex' : 'none'}">
+        <button onclick="abrirModalPodcast('${r.id}')">✏️ Editar</button>
+        <button class="excluir" onclick="excluirPodcast('${r.id}')">🗑️ Excluir</button>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function hojeISO() {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+function formatarDataISO(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  if (!m) return new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+  return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+}
+
+function dataParaISO(texto) {
+  // converte "21 de outubro de 2026" de volta para yyyy-mm-dd (para editar)
+  const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const m = /(\d{1,2}) de ([a-zç]+) de (\d{4})/i.exec(texto || '');
+  if (!m) return hojeISO();
+  const idx = MESES.indexOf(m[2].toLowerCase());
+  if (idx < 0) return hojeISO();
+  return `${m[3]}-${String(idx + 1).padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+}
+
+window.previewPodFoto = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  podFotoFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('preview-pod-foto').src = e.target.result;
+    document.getElementById('preview-pod-foto-container').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('pod-foto-txt').textContent = '✅ ' + file.name;
+};
+
+window.previewPodAudio = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  podAudioFile = file;
+  const player = document.getElementById('preview-pod-audio');
+  player.src = URL.createObjectURL(file);
+  player.style.display = 'block';
+  document.getElementById('pod-audio-txt').textContent = `✅ ${file.name} (${(file.size / 1048576).toFixed(1)} MB)`;
+};
+
+window.abrirModalPodcast = function(docId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem publicar episódios.'); return; }
+  podEditandoId = docId || null;
+  podFotoFile = null;
+  podAudioFile = null;
+
+  const sel = document.getElementById('pod-materia');
+  sel.innerHTML = MATERIAS_POD.map(m => `<option value="${m.id}">${escapeHtml(m.nome)}</option>`).join('');
+  sel.value = MATERIAS_POD.some(m => m.id === podcastFiltro) ? podcastFiltro : 'geral';
+
+  document.getElementById('pod-titulo').value       = '';
+  document.getElementById('pod-entrevistador').value = '';
+  document.getElementById('pod-descricao').value    = '';
+  document.getElementById('pod-data').value         = hojeISO();
+  document.getElementById('pod-foto').value         = '';
+  document.getElementById('pod-audio').value        = '';
+  document.getElementById('pod-foto-txt').textContent  = '📷 Clique para enviar a foto';
+  document.getElementById('pod-audio-txt').textContent = '🎧 Clique para enviar o áudio (opcional)';
+  document.getElementById('preview-pod-foto-container').style.display = 'none';
+  const player = document.getElementById('preview-pod-audio');
+  player.pause(); player.removeAttribute('src'); player.style.display = 'none';
+  document.getElementById('barra-upload-pod-container').style.display = 'none';
+  document.getElementById('barra-upload-pod-fill').style.width = '0%';
+  const btn = document.getElementById('btn-salvar-podcast');
+  btn.disabled = false;
+  btn.textContent = podEditandoId ? 'Salvar Alterações' : 'Publicar Episódio';
+  document.getElementById('titulo-modal-podcast').textContent = podEditandoId ? 'Editar Episódio' : 'Novo Episódio';
+
+  if (podEditandoId) {
+    const r = podcastsCache.find(x => String(x.id) === String(podEditandoId));
+    if (r) {
+      document.getElementById('pod-titulo').value        = r.titulo || '';
+      document.getElementById('pod-materia').value       = r.legenda || 'geral';
+      document.getElementById('pod-entrevistador').value = r.autor || '';
+      document.getElementById('pod-descricao').value     = r.texto || '';
+      document.getElementById('pod-data').value          = dataParaISO(r.data);
+      const midia = lerMidiaPod(r);
+      if (midia.foto && midia.foto.url) {
+        document.getElementById('preview-pod-foto').src = midia.foto.url;
+        document.getElementById('preview-pod-foto-container').style.display = 'block';
+        document.getElementById('pod-foto-txt').textContent = '📷 Foto atual mantida (clique para trocar)';
+      }
+      if (midia.audio && midia.audio.url) {
+        player.src = midia.audio.url;
+        player.style.display = 'block';
+        document.getElementById('pod-audio-txt').textContent = '🎧 Áudio atual mantido (clique para trocar)';
+      }
+    }
+  }
+  window.abrirModal('modal-podcast');
+};
+
+function uploadPod(arquivo, resourceType, pasta, rotulo) {
+  const fill  = document.getElementById('barra-upload-pod-fill');
+  const label = document.getElementById('barra-upload-pod-label');
+  document.getElementById('barra-upload-pod-container').style.display = 'block';
+  fill.style.width = '0%';
+  label.textContent = `Enviando ${rotulo}...`;
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('file', arquivo);
+    fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    fd.append('folder', `jornal/${pasta}`);
+    const xhr = new XMLHttpRequest();
+    // O Cloudinary trata áudio pela rota "video"
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`);
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) {
+        const pct = Math.round(e.loaded / e.total * 100);
+        fill.style.width = pct + '%';
+        label.textContent = `Enviando ${rotulo}... ${pct}%`;
+      }
+    };
+    xhr.onload = () => {
+      let resp = {};
+      try { resp = JSON.parse(xhr.responseText); } catch {}
+      if (xhr.status === 200) resolve(resp);
+      else reject(new Error((resp.error && resp.error.message) || 'Erro no upload'));
+    };
+    xhr.onerror = () => reject(new Error('Falha de rede ao fazer upload.'));
+    xhr.send(fd);
+  });
+}
+
+window.salvarPodcast = async function() {
+  if (!editorLogado) { alert('⛔ Apenas editores podem salvar episódios.'); return; }
+  const titulo        = document.getElementById('pod-titulo').value.trim();
+  const materia       = document.getElementById('pod-materia').value;
+  const entrevistador = document.getElementById('pod-entrevistador').value.trim();
+  const descricao     = document.getElementById('pod-descricao').value.trim();
+  const dataFormatada = formatarDataISO(document.getElementById('pod-data').value);
+
+  if (!titulo) { alert('Preencha o título do episódio.'); return; }
+
+  const registroAtual = podEditandoId
+    ? podcastsCache.find(x => String(x.id) === String(podEditandoId))
+    : null;
+  const atual = registroAtual ? lerMidiaPod(registroAtual) : {};
+  if (!podFotoFile && !(atual.foto && atual.foto.url)) {
+    alert('Envie a foto de capa do episódio.'); return;
+  }
+
+  const btn = document.getElementById('btn-salvar-podcast');
+  btn.disabled = true; btn.textContent = 'Publicando...';
+
+  try {
+    const midia = { foto: atual.foto || null, audio: atual.audio || null };
+    const antigos = []; // arquivos substituídos, removidos só depois de salvar
+
+    if (podFotoFile) {
+      const r = await uploadPod(podFotoFile, 'image', 'podcast/fotos', 'foto');
+      if (midia.foto && midia.foto.public_id) antigos.push({ id: midia.foto.public_id, tipo: 'image/jpeg' });
+      midia.foto = { url: r.secure_url, public_id: r.public_id };
+    }
+    if (podAudioFile) {
+      const r = await uploadPod(podAudioFile, 'video', 'podcast/audios', 'áudio');
+      if (midia.audio && midia.audio.public_id) antigos.push({ id: midia.audio.public_id, tipo: 'video/audio' });
+      midia.audio = { url: r.secure_url, public_id: r.public_id, tipo: podAudioFile.type || 'audio' };
+    }
+
+    const item = {
+      tipo: 'podcast',
+      titulo,
+      texto: descricao,
+      autor: entrevistador,
+      legenda: materia,
+      data: dataFormatada,
+      midia_url: JSON.stringify(midia),
+      midia_public_id: midia.audio ? midia.audio.public_id : null,
+      tipo_midia: midia.audio ? (midia.audio.tipo || 'audio') : null
+    };
+
+    let error;
+    if (podEditandoId) {
+      ({ error } = await supabase.from('materiais').update(item).eq('id', podEditandoId));
+    } else {
+      item.created_at = Date.now();
+      ({ error } = await supabase.from('materiais').insert([item]));
+    }
+    if (error) throw error;
+
+    for (const a of antigos) await excluirDoCloudinary(a.id, a.tipo);
+
+    toast(podEditandoId ? '✅ Episódio atualizado!' : '✅ Episódio publicado!');
+    registrarAtividade(podEditandoId ? 'editou podcast' : 'publicou podcast', `"${titulo}"`);
+    podcastFiltro = materia;
+    podFotoFile = null; podAudioFile = null; podEditandoId = null;
+    window.fecharModal('modal-podcast');
+    await carregarPodcasts();
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao salvar episódio: ' + (err.message || err));
+    btn.disabled = false;
+    btn.textContent = podEditandoId ? 'Salvar Alterações' : 'Publicar Episódio';
+  }
+};
+
+window.excluirPodcast = async function(docId) {
+  if (!editorLogado) { alert('⛔ Apenas editores podem excluir episódios.'); return; }
+  if (!confirm('Excluir este episódio?')) return;
+  try {
+    const reg = podcastsCache.find(x => String(x.id) === String(docId));
+    const { error } = await supabase.from('materiais').delete().eq('id', docId);
+    if (error) throw error;
+    if (reg) {
+      const midia = lerMidiaPod(reg);
+      if (midia.foto && midia.foto.public_id)   await excluirDoCloudinary(midia.foto.public_id, 'image/jpeg');
+      if (midia.audio && midia.audio.public_id) await excluirDoCloudinary(midia.audio.public_id, 'video/audio');
+    }
+    toast('🗑️ Episódio excluído.');
+    registrarAtividade('excluiu podcast', `"${reg ? reg.titulo : docId}"`);
+    await carregarPodcasts();
+  } catch (err) {
+    alert('Erro ao excluir: ' + err.message);
+  }
+};
+
+// Realtime para podcasts (mesma tabela "materiais")
+supabase
+  .channel('podcasts-realtime')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'materiais' }, () => carregarPodcasts())
+  .subscribe();
+
+/* ================================================================
    INICIALIZAÇÃO
 ================================================================ */
 async function init() {
@@ -3022,6 +3531,7 @@ async function init() {
       carregarCardapio(),
       carregarProgramacao(),
       carregarArquivosProg(),
+      carregarPodcasts(),
       carregarDestaques(),
       carregarProposta(),
       carregarAvisos()
