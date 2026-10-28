@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta name="keywords" content="CEPI, cepi, GSR, gsr, CEPI gsr, cepi gsr, Gomes de Souza Ramos, gomes de souza ramos, jornal estudantil, jornal GSR, jornal gsr, jornal da escola">
   <meta charset="UTF-8" />
+  <meta name="keywords" content="CEPI, cepi, GSR, gsr, CEPI gsr, cepi gsr, Gomes de Souza Ramos, gomes de souza ramos, jornal estudantil, jornal GSR, jornal gsr, jornal da escola">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com https://cdn.jsdelivr.net https://cloudflareinsights.com; frame-src https://docs.google.com; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="google-site-verification" content="p7FBHCQec61ValE7b2kRsz-hJXZnf72aEdy4tPYO5z4" />
+  <meta name="google-site-verification" content="tBmp-rxfy2CXKfnmln9ngENyoOm9_RE8OpirSILT04M" />
   <link rel="apple-touch-icon" sizes="180x180" href="imagensj/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="imagensj/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="imagensj/favicon-16x16.png">
@@ -188,9 +190,15 @@
       background: #ffffff;
       border-bottom: 2px solid var(--borda);
       display: flex; overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
     }
+    nav::-webkit-scrollbar { display: none; }
+    .nav-ico { margin-right: 6px; }
     nav button {
-      flex: 1; min-width: 140px;
+      flex: 1 0 auto; min-width: 140px;
+      white-space: nowrap;
       background: transparent; border: none;
       border-bottom: 4px solid transparent;
       color: #6b7280; padding: 18px 24px;
@@ -705,10 +713,15 @@
 
       /* Nav */
       nav button {
-        min-width: 110px;
-        padding: 14px 16px;
-        font-size: 0.85rem;
+        min-width: 0;
+        padding: 10px 14px;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 4px; line-height: 1.2;
       }
+      .nav-ico { margin-right: 0; font-size: 1.35rem; line-height: 1; }
 
       /* Main */
       main { padding: 24px 14px; }
@@ -764,7 +777,7 @@
 
     @media (max-width: 400px) {
       .logo-area h1 { font-size: 1.6rem; }
-      nav button { min-width: 90px; font-size: 0.78rem; padding: 12px 10px; }
+      nav button { min-width: 0; font-size: 0.72rem; padding: 10px 11px; }
       .hero-titulo { font-size: 2rem; }
     }
 
@@ -894,14 +907,14 @@
 
 <!-- NAV -->
 <nav>
-  <button class="ativa" onclick="trocarAba('jornal', this)">📰 Notícias</button>
-  <button onclick="trocarAba('reportagem', this)">🔍 Reportagem</button>
-  <button onclick="trocarAba('cardapio', this)">🍽️ Cardápio</button>
-  <button onclick="trocarAba('podcast', this)">🎙️ PodCast</button>
-  <button onclick="trocarAba('programacao', this)">📅 Programação</button>
-  <button onclick="trocarAba('avisos', this)">🔔 Avisos</button>
-  <button onclick="trocarAba('destaques', this)">⭐ Destaques</button>
-  <button onclick="trocarAba('mais', this)">☰ Mais</button>
+  <button class="ativa" onclick="trocarAba('jornal', this)"><span class="nav-ico" aria-hidden="true">📰</span><span class="nav-txt">Notícias</span></button>
+  <button onclick="trocarAba('reportagem', this)"><span class="nav-ico" aria-hidden="true">🔍</span><span class="nav-txt">Reportagem</span></button>
+  <button onclick="trocarAba('cardapio', this)"><span class="nav-ico" aria-hidden="true">🍽️</span><span class="nav-txt">Cardápio</span></button>
+  <button onclick="trocarAba('podcast', this)"><span class="nav-ico" aria-hidden="true">🎙️</span><span class="nav-txt">PodCast</span></button>
+  <button onclick="trocarAba('programacao', this)"><span class="nav-ico" aria-hidden="true">📅</span><span class="nav-txt">Programação</span></button>
+  <button onclick="trocarAba('avisos', this)"><span class="nav-ico" aria-hidden="true">🔔</span><span class="nav-txt">Avisos</span></button>
+  <button onclick="trocarAba('destaques', this)"><span class="nav-ico" aria-hidden="true">⭐</span><span class="nav-txt">Destaques</span></button>
+  <button onclick="trocarAba('mais', this)"><span class="nav-ico" aria-hidden="true">☰</span><span class="nav-txt">Mais</span></button>
 </nav>
 
 <main>
@@ -1425,7 +1438,11 @@
      SUPABASE + CLOUDINARY
 ================================================================ -->
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+// Console silencioso em produção. Mude para true só para depurar.
+const DEBUG = false;
+if (!DEBUG) { for (const m of ['log', 'info', 'warn', 'error', 'debug', 'trace']) console[m] = () => {}; }
 
 /* ================================================================
    🔧 CONFIGURAÇÕES — PREENCHA COM SEUS DADOS
@@ -1443,9 +1460,8 @@ const SUPABASE_ANON_KEY = 'sb_publishable_RZlPWL1xp_5ufL6xck7V7A_LNpf28q3'
 //    Isso garante que PDFs sejam aceitos via rota /image/upload.
 const CLOUDINARY_CLOUD_NAME = 'dhjm92hcs'   // ex: 'minha-escola'
 const CLOUDINARY_UPLOAD_PRESET = 'jornal_preset'    // ex: 'jornal_escolar'
-// Para exclusão de imagens: Cloudinary → Settings → API Keys
-const CLOUDINARY_API_KEY    = '972156728474352'
-const CLOUDINARY_API_SECRET = 'eVQmWhfh_f0OIf6SNPyh7CY0bts'
+// A API Secret do Cloudinary NÃO deve ficar no navegador. A exclusão de arquivos
+// deve ser feita por um servidor (ver excluirDoCloudinary abaixo).
 
 /* ================================================================
    INICIALIZAÇÃO DO SUPABASE
@@ -1458,13 +1474,32 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
    CREDENCIAIS DE EDITOR
    Adicione ou remova editores aqui.
 ================================================================ */
-const EDITORES_AUTORIZADOS = [
-  { usuario: "Franco",    senha: "Bruno007"    },
-  { usuario: "Morais Luiza", senha: "Analu2020"  },
-  { usuario: "Cleide",      senha: "Seduc2026" },
-  { usuario: "Silvana",     senha: "Seduc2026"},
-  { usuario: "Secretariacepi",  senha:"Cepigsr"}
+// Os nomes e senhas NÃO ficam mais em texto puro. Cada linha é um editor
+// (identificador + nome criptografado). Para adicionar/trocar, use gerar-editor.html.
+const EDITORES_CRIPTO = [
+  { id: "829a8a18c0cc41357017a37f9681a0d2", iv: "8b864e745169d8fa501d6638", ct: "07f0c73b288b2543bd4b98962670661fccfa85cb397d" },
+  { id: "a84c3e57e026ee92764614b6888febce", iv: "2d3d78a45b982eec06ef8647", ct: "fdaed9aaf13f45eca581a7c6585e4a824562844f6adbaabcf372d1d8" },
+  { id: "e39d573e3195ae414d7f1aa31cf8907e", iv: "d82de5315061600150916e0e", ct: "2135bd421bf5b96f4064ee659d97c159958489fe3b8a" },
+  { id: "f814dc4348158e3795b20bded8c8b4e4", iv: "21343b81d3c2aa88ea372a6f", ct: "dbc18c7165ef4f8acb49c05b851a8b10aa5c21120947cc" },
+  { id: "3fbf88a6143cee13884c49098ba9ea27", iv: "df0895f6fecbba5dd1c97f84", ct: "fb238ab825b23e7de10491684d5ef5fa0a9d764deb00c39156eebf5d5ed3" }
 ];
+const HEX2BYTES = h => Uint8Array.from(h.match(/../g), b => parseInt(b, 16));
+const BYTES2HEX = b => Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join('');
+async function validarEditor(usuario, senha) {
+  if (!usuario || !senha || !(window.crypto && crypto.subtle)) return null;
+  try {
+    const enc  = new TextEncoder();
+    const base = await crypto.subtle.importKey('raw', enc.encode(usuario + '\u0000' + senha), 'PBKDF2', false, ['deriveBits']);
+    const bits = new Uint8Array(await crypto.subtle.deriveBits(
+      { name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode('jornal-gsr-v1'), iterations: 150000 }, base, 384));
+    const id  = BYTES2HEX(bits.slice(0, 16));
+    const reg = EDITORES_CRIPTO.find(e => e.id === id);
+    if (!reg) return null;
+    const chave = await crypto.subtle.importKey('raw', bits.slice(16, 48), 'AES-GCM', false, ['decrypt']);
+    const nome  = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: HEX2BYTES(reg.iv) }, chave, HEX2BYTES(reg.ct));
+    return new TextDecoder().decode(nome);
+  } catch (e) { return null; }
+}
 
 /* ── Estado ── */
 let editorLogado = false;
@@ -1535,6 +1570,10 @@ window.fecharLightbox = function() {
 };
 
 // Fechar clicando no fundo ou pressionando Esc
+document.addEventListener('click', function(e) {
+  const alvo = e.target.closest && e.target.closest('[data-lb-url]');
+  if (alvo) window.abrirLightbox(alvo.dataset.lbUrl, alvo.dataset.lbLeg, alvo.dataset.lbVideo === 'true');
+});
 document.getElementById('lightbox').addEventListener('click', function(e) {
   if (e.target === this) window.fecharLightbox();
 });
@@ -1550,6 +1589,7 @@ window.trocarAba = function(id, btn) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('ativa'));
   document.getElementById('aba-' + id).classList.add('ativa');
   btn.classList.add('ativa');
+  try { btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (e) {}
 };
 
 /* ================================================================
@@ -1593,13 +1633,13 @@ window.alternarSenha = function() {
   }
 };
 
-window.fazerLogin = function() {
+window.fazerLogin = async function() {
   const usuario = document.getElementById('campo-usuario').value.trim();
   const senha   = document.getElementById('campo-senha').value;
-  const ok = EDITORES_AUTORIZADOS.find(e => e.usuario === usuario && e.senha === senha);
-  if (ok) {
+  const nomeOk  = await validarEditor(usuario, senha);
+  if (nomeOk) {
     editorLogado = true;
-    nomeEditor = ok.usuario;
+    nomeEditor = nomeOk;
     registrarAtividade('login', 'Entrou no modo editor');
     window.fecharModal('modal-login');
     document.getElementById('campo-usuario').value = '';
@@ -1804,36 +1844,10 @@ async function uploadArquivo(arquivo, pasta) {
    EXCLUIR ARQUIVO DO CLOUDINARY (com assinatura SHA-1)
 ================================================================ */
 async function excluirDoCloudinary(publicId, tipoMidia) {
-  if (!CLOUDINARY_API_KEY || CLOUDINARY_API_KEY === 'COLOQUE_SUA_API_KEY_AQUI') return;
-  try {
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-    const resourceType = (tipoMidia && tipoMidia.startsWith('video')) ? 'video' : 'image';
-    const strToSign = `public_id=${publicId}&timestamp=${timestamp}${CLOUDINARY_API_SECRET}`;
-
-    // Gera assinatura SHA-1 via Web Crypto API
-    const encoder = new TextEncoder();
-    const data = encoder.encode(strToSign);
-    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    const formData = new FormData();
-    formData.append('public_id', publicId);
-    formData.append('timestamp', timestamp);
-    formData.append('api_key', CLOUDINARY_API_KEY);
-    formData.append('signature', signature);
-
-    const resp = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/destroy`,
-      { method: 'POST', body: formData }
-    );
-    const result = await resp.json();
-    if (result.result !== 'ok') {
-      console.warn('Cloudinary não removeu o arquivo:', result);
-    }
-  } catch (e) {
-    console.warn('Erro ao excluir do Cloudinary:', e.message);
-  }
+  // Desativado de propósito: a exclusão no Cloudinary exige a API Secret, que não pode
+  // ficar no código do site. O registro é apagado normalmente do banco; o arquivo
+  // continua no Cloudinary até existir uma função de servidor para removê-lo.
+  return;
 }
 
 /* ================================================================
@@ -2109,7 +2123,11 @@ window.excluirFoto = async function(docId) {
    RENDER NOTÍCIAS — SUPABASE
 ================================================================ */
 function escapeHtml(str) {
-  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Só aceita URLs https:// (bloqueia javascript:, data: etc. vindos do banco)
+function escapeUrl(u) {
+  return escapeHtml(/^https:\/\//i.test(String(u || '')) ? u : '');
 }
 
 /* ── Limite de caracteres para exibir "ler mais" ── */
@@ -2168,18 +2186,18 @@ async function carregarNoticias() {
       const m = midiasArr[0];
       const isVid = m.tipo && m.tipo.startsWith('video');
       midiaHtml = isVid
-        ? `<video src="${escapeHtml(m.url)}" controls></video>`
-        : `<img src="${escapeHtml(m.url)}" alt="${legenda}"
-               onclick="abrirLightbox('${escapeHtml(m.url)}','${legenda}',false)"
+        ? `<video src="${escapeUrl(m.url)}" controls></video>`
+        : `<img src="${escapeUrl(m.url)}" alt="${legenda}"
+               data-lb-url="${escapeUrl(m.url)}" data-lb-leg="${legenda}" data-lb-video="false"
                style="cursor:zoom-in"/>`;
     } else if (midiasArr.length > 1) {
       const cols = Math.min(midiasArr.length, 3);
       const itens = midiasArr.map((m, i) => {
         const isVid = m.tipo && m.tipo.startsWith('video');
         return `<div style="aspect-ratio:1;overflow:hidden;background:#111;">` + (isVid
-          ? `<video src="${escapeHtml(m.url)}" controls style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
-          : `<img src="${escapeHtml(m.url)}" alt="${legenda} ${i+1}"
-                 onclick="abrirLightbox('${escapeHtml(m.url)}','${legenda}',false)"
+          ? `<video src="${escapeUrl(m.url)}" controls style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
+          : `<img src="${escapeUrl(m.url)}" alt="${legenda} ${i+1}"
+                 data-lb-url="${escapeUrl(m.url)}" data-lb-leg="${legenda}" data-lb-video="false"
                  style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/>`) + `</div>`;
       }).join('');
       midiaHtml = `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:2px;">${itens}</div>`;
@@ -2220,6 +2238,7 @@ supabase
 ================================================================ */
 async function carregarFotos() {
   const lista = document.getElementById('lista-fotos');
+  if (!lista) return; // aba de fotos não existe mais no HTML; evita TypeError
   const { data: rows, error } = await supabase
     .from('materiais')
     .select('*')
@@ -2242,10 +2261,10 @@ async function carregarFotos() {
     const legTxt  = escapeHtml(f.titulo) + (f.legenda ? ' — ' + escapeHtml(f.legenda) : '');
     const midiaHtml = f.midia_url
       ? (isVideo
-          ? `<video src="${escapeHtml(f.midia_url)}" controls style="width:100%;display:block;cursor:pointer;"
-               onclick="abrirLightbox('${escapeHtml(f.midia_url)}','${legTxt}',true)"></video>`
-          : `<img src="${escapeHtml(f.midia_url)}" alt="${escapeHtml(f.titulo)}"
-               onclick="abrirLightbox('${escapeHtml(f.midia_url)}','${legTxt}',false)"
+          ? `<video src="${escapeUrl(f.midia_url)}" controls style="width:100%;display:block;cursor:pointer;"
+               data-lb-url="${escapeUrl(f.midia_url)}" data-lb-leg="${legTxt}" data-lb-video="true"></video>`
+          : `<img src="${escapeUrl(f.midia_url)}" alt="${escapeHtml(f.titulo)}"
+               data-lb-url="${escapeUrl(f.midia_url)}" data-lb-leg="${legTxt}" data-lb-video="false"
                style="cursor:zoom-in"/>`)
       : `<div style="background:#1c1c1c;height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:3rem;">📷</div>`;
     return `
@@ -2533,18 +2552,18 @@ async function carregarReportagens() {
       const m = midiasArr[0];
       const isVid = m.tipo && m.tipo.startsWith('video');
       midiaHtml = isVid
-        ? `<video src="${escapeHtml(m.url)}" controls></video>`
-        : `<img src="${escapeHtml(m.url)}" alt="${legenda}"
-               onclick="abrirLightbox('${escapeHtml(m.url)}','${legenda}',false)"
+        ? `<video src="${escapeUrl(m.url)}" controls></video>`
+        : `<img src="${escapeUrl(m.url)}" alt="${legenda}"
+               data-lb-url="${escapeUrl(m.url)}" data-lb-leg="${legenda}" data-lb-video="false"
                style="cursor:zoom-in"/>`;
     } else if (midiasArr.length > 1) {
       const cols = Math.min(midiasArr.length, 3);
       const itens = midiasArr.map((m, i) => {
         const isVid = m.tipo && m.tipo.startsWith('video');
         return `<div style="aspect-ratio:1;overflow:hidden;background:#111;">` + (isVid
-          ? `<video src="${escapeHtml(m.url)}" controls style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
-          : `<img src="${escapeHtml(m.url)}" alt="${legenda} ${i+1}"
-                 onclick="abrirLightbox('${escapeHtml(m.url)}','${legenda}',false)"
+          ? `<video src="${escapeUrl(m.url)}" controls style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
+          : `<img src="${escapeUrl(m.url)}" alt="${legenda} ${i+1}"
+                 data-lb-url="${escapeUrl(m.url)}" data-lb-leg="${legenda}" data-lb-video="false"
                  style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/>`) + `</div>`;
       }).join('');
       midiaHtml = `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:2px;">${itens}</div>`;
@@ -2937,8 +2956,8 @@ async function carregarDestaques() {
       ? new Date(d.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })
       : '';
     const imgHtml = d.midia_url
-      ? `<img class="destaque-card-img" src="${escapeHtml(d.midia_url)}" alt="${escapeHtml(d.titulo)}"
-             onclick="abrirLightbox('${escapeHtml(d.midia_url)}','${escapeHtml(d.titulo)}',false)">`
+      ? `<img class="destaque-card-img" src="${escapeUrl(d.midia_url)}" alt="${escapeHtml(d.titulo)}"
+             data-lb-url="${escapeUrl(d.midia_url)}" data-lb-leg="${escapeHtml(d.titulo)}" data-lb-video="false">`
       : `<div class="destaque-card-img-placeholder">⭐</div>`;
 
     const textoId   = 'texto-dest-' + d.id;
@@ -3066,13 +3085,29 @@ window.excluirArquivoProg = async function(arquivoId) {
   if (!editorLogado) { alert('⛔ Apenas editores podem excluir arquivos.'); return; }
   if (!confirm('Remover este arquivo da programação?')) return;
   try {
-    const { data: reg } = await supabase.from('programacao_arquivos').select('arquivo_public_id,tipo_arquivo,titulo').eq('id', arquivoId).single();
-    const { error } = await supabase.from('programacao_arquivos').delete().eq('id', arquivoId);
+    const { data: reg } = await supabase.from('programacao_arquivos')
+      .select('arquivo_public_id,tipo_arquivo,titulo').eq('id', arquivoId).maybeSingle();
+
+    // .select() após o delete devolve as linhas realmente apagadas.
+    // Sem isso, o Supabase não dá erro quando a política (RLS) bloqueia a exclusão:
+    // o site mostrava "removido" mas o item voltava ao recarregar.
+    const { data: removidos, error } = await supabase.from('programacao_arquivos')
+      .delete().eq('id', arquivoId).select('id');
     if (error) throw error;
+    if (!removidos || removidos.length === 0) {
+      throw new Error('O banco de dados não permitiu a exclusão (falta a política DELETE na tabela "programacao_arquivos"). Veja o arquivo SEGURANCA.md.');
+    }
+
+    // Apaga também o arquivo no Cloudinary (como já é feito nas outras abas)
+    if (reg && reg.arquivo_public_id) await excluirDoCloudinary(reg.arquivo_public_id, reg.tipo_arquivo);
+
     toast('🗑️ Arquivo removido.');
     registrarAtividade('excluiu arquivo programação', `"${reg?.titulo || arquivoId}"`);
+  } catch (err) {
+    alert('Erro ao remover: ' + (err.message || err));
+  } finally {
     await carregarArquivosProg();
-  } catch (err) { alert('Erro: ' + err.message); }
+  }
 };
 
 async function carregarArquivosProg() {
@@ -3097,17 +3132,18 @@ async function carregarArquivosProg() {
       ? `<iframe
            class="prog-arquivo-embed"
            src="https://docs.google.com/viewer?url=${encodeURIComponent(arq.arquivo_url)}&embedded=true"
+           referrerpolicy="no-referrer"
            title="${escapeHtml(arq.titulo)}"
            allow="fullscreen">
          </iframe>`
       : isImg
-        ? `<img src="${escapeHtml(arq.arquivo_url)}" alt="${escapeHtml(arq.titulo)}"
+        ? `<img src="${escapeUrl(arq.arquivo_url)}" alt="${escapeHtml(arq.titulo)}"
                style="max-width:100%;margin-top:10px;border:1px solid var(--borda);display:block;cursor:zoom-in;"
-               onclick="abrirLightbox('${escapeHtml(arq.arquivo_url)}','${escapeHtml(arq.titulo)}',false)">`
+               data-lb-url="${escapeUrl(arq.arquivo_url)}" data-lb-leg="${escapeHtml(arq.titulo)}" data-lb-video="false">`
         : '';
 
     const excluirBtn = editorLogado
-      ? `<button class="btn-secundario so-editor" style="margin-top:8px;padding:6px 16px;border-color:#e74c3c;color:#e74c3c;"
+      ? `<button type="button" class="btn-secundario" style="flex:none;margin-top:8px;padding:6px 16px;border-color:#e74c3c;color:#e74c3c;"
                 onclick="excluirArquivoProg('${arq.id}')">🗑️ Remover</button>`
       : '';
 
@@ -3121,7 +3157,7 @@ async function carregarArquivosProg() {
     <div style="margin-bottom:32px;">
       <p style="font-family:var(--fonte-titulo);font-size:1.2rem;color:#1a1a2e;margin-bottom:4px;">${escapeHtml(arq.titulo)}</p>
       ${dataFormatada ? `<p style="font-size:0.8rem;color:#aaa;margin-bottom:8px;">${dataFormatada}</p>` : ''}
-      <a class="prog-arquivo" href="${escapeHtml(urlDownload)}" target="_blank" rel="noopener">
+      <a class="prog-arquivo" href="${escapeUrl(urlDownload)}" target="_blank" rel="noopener">
         ${isPdf ? '📄' : isImg ? '🖼️' : '📎'} ${isPdf ? 'Baixar PDF' : 'Abrir / Baixar'} — ${escapeHtml(arq.titulo)}
       </a>
       ${viewerHtml}
@@ -3256,11 +3292,11 @@ function renderPodcasts() {
     const midia = lerMidiaPod(r);
     const titulo = escapeHtml(r.titulo);
     const imgHtml = midia.foto && midia.foto.url
-      ? `<img class="pod-card-img" src="${escapeHtml(midia.foto.url)}" alt="${titulo}"
-             onclick="abrirLightbox('${escapeHtml(midia.foto.url)}','${titulo}',false)">`
+      ? `<img class="pod-card-img" src="${escapeUrl(midia.foto.url)}" alt="${titulo}"
+             data-lb-url="${escapeUrl(midia.foto.url)}" data-lb-leg="${titulo}" data-lb-video="false">`
       : `<div class="pod-card-img-placeholder">🎙️</div>`;
     const audioHtml = midia.audio && midia.audio.url
-      ? `<div class="pod-audio"><audio controls preload="none" src="${escapeHtml(midia.audio.url)}"></audio></div>`
+      ? `<div class="pod-audio"><audio controls preload="none" src="${escapeUrl(midia.audio.url)}"></audio></div>`
       : `<p class="pod-sem-audio">🎧 Áudio em breve</p>`;
 
     const textoId = 'texto-pod-' + r.id;
