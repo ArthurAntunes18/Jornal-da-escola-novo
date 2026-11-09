@@ -245,6 +245,13 @@
       color: #1a1a2e; margin-bottom: 8px;
     }
     .card-corpo p { color: #555; font-size: 1rem; }
+    .card-corpo .card-subtitulo {
+      font-family: var(--fonte-corpo);
+      font-size: 1.05rem; font-weight: 600;
+      color: #444; line-height: 1.4;
+      margin: -2px 0 10px;
+      word-break: break-word; overflow-wrap: break-word;
+    }
     .card-data {
       font-size: 0.8rem; color: var(--amarelo);
       letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
@@ -1131,6 +1138,8 @@
     <input type="text" id="pub-titulo" placeholder="Ex: Festa Junina 2025"/>
 
     <div id="bloco-descricao">
+      <label>Subtítulo (opcional)</label>
+      <input type="text" id="pub-subtitulo" placeholder="Ex: Alunos do 3º ano conquistam o primeiro lugar"/>
       <label>Texto da Notícia</label>
       <textarea id="pub-texto" placeholder="Digite o conteúdo da notícia aqui..."></textarea>
       <label>Autor(es)</label>
@@ -1174,6 +1183,9 @@
 
     <label>Título</label>
     <input type="text" id="rep-titulo" placeholder="Ex: Visita ao museu municipal"/>
+
+    <label>Subtítulo (opcional)</label>
+    <input type="text" id="rep-subtitulo" placeholder="Ex: Alunos conhecem a história da cidade"/>
 
     <label>Categoria</label>
     <select id="rep-categoria">
@@ -1865,6 +1877,7 @@ window.abrirModalPublicacao = function(tipo, docId) {
       if (error || !d) return;
       document.getElementById('pub-tipo').value   = tipo;
       document.getElementById('pub-titulo').value = d.titulo || '';
+      if (tipo === 'noticia') document.getElementById('pub-subtitulo').value = d.subtitulo || '';
       if (tipo === 'noticia') document.getElementById('pub-texto').value   = d.texto   || '';
       if (tipo === 'noticia') document.getElementById('pub-autor').value   = d.autor   || '';
       if (tipo === 'foto')    document.getElementById('pub-legenda').value = d.legenda || '';
@@ -1873,6 +1886,7 @@ window.abrirModalPublicacao = function(tipo, docId) {
   } else {
     document.getElementById('pub-tipo').value    = 'noticia';
     document.getElementById('pub-titulo').value  = '';
+    document.getElementById('pub-subtitulo').value = '';
     document.getElementById('pub-texto').value   = '';
     document.getElementById('pub-autor').value   = '';
     document.getElementById('pub-legenda').value = '';
@@ -1923,7 +1937,7 @@ window.salvarPublicacao = async function() {
         barraFill.style.width  = '100%';
       }
       const item = { tipo, titulo, data: dataFormatada, created_at: Date.now() };
-      if (tipo === 'noticia') { item.texto = document.getElementById('pub-texto').value.trim(); item.autor = document.getElementById('pub-autor').value.trim(); }
+      if (tipo === 'noticia') { item.subtitulo = document.getElementById('pub-subtitulo').value.trim(); item.texto = document.getElementById('pub-texto').value.trim(); item.autor = document.getElementById('pub-autor').value.trim(); }
       else { item.legenda = document.getElementById('pub-legenda').value.trim(); }
       if (midiasNovas.length > 0) {
         const midiaUrlSalva = midiasNovas.length === 1 ? midiasNovas[0].url
@@ -1985,6 +1999,7 @@ window.salvarPublicacao = async function() {
         tipo, titulo, data: dataFormatada, created_at: Date.now(),
         texto: document.getElementById('pub-texto').value.trim(),
         autor: document.getElementById('pub-autor').value.trim(),
+        subtitulo: document.getElementById('pub-subtitulo').value.trim(),
         midia_url:       midiaUrlSalva,
         midia_public_id: midiasNovas[0]?.public_id || null,
         tipo_midia:      midiasNovas[0]?.tipo       || null,
@@ -2214,6 +2229,7 @@ async function carregarNoticias() {
         <div class="card-corpo">
           <p class="card-data">${escapeHtml(n.data)}${n.autor ? ' · ✍️ ' + escapeHtml(n.autor) : ''}</p>
           <h2>${escapeHtml(n.titulo)}</h2>
+          ${n.subtitulo ? `<p class="card-subtitulo">${escapeHtml(n.subtitulo)}</p>` : ''}
           ${textoHtml}
         </div>
         <div class="acoes-editor" style="display:${editorLogado ? 'flex' : 'none'}">
@@ -2364,6 +2380,7 @@ window.abrirModalReportagem = function(repId) {
     supabase.from('reportagens').select('*').eq('id', repEditandoId).single().then(({ data }) => {
       if (!data) return;
       document.getElementById('rep-titulo').value    = data.titulo    || '';
+      document.getElementById('rep-subtitulo').value = data.subtitulo || '';
       document.getElementById('rep-texto').value     = data.texto     || '';
       document.getElementById('rep-autor').value     = data.autor     || '';
       document.getElementById('rep-turma').value     = data.turma     || '';
@@ -2374,6 +2391,7 @@ window.abrirModalReportagem = function(repId) {
     });
   } else {
     document.getElementById('rep-titulo').value     = '';
+    document.getElementById('rep-subtitulo').value  = '';
     document.getElementById('rep-texto').value      = '';
     document.getElementById('rep-autor').value      = '';
     document.getElementById('rep-turma').value      = '';
@@ -2387,6 +2405,7 @@ window.abrirModalReportagem = function(repId) {
 window.salvarReportagem = async function() {
   if (!editorLogado) { alert('⛔ Apenas editores podem salvar reportagens.'); return; }
   const titulo    = document.getElementById('rep-titulo').value.trim();
+  const subtitulo = document.getElementById('rep-subtitulo').value.trim();
   const texto     = document.getElementById('rep-texto').value.trim();
   const autor     = document.getElementById('rep-autor').value.trim();
   const turma     = document.getElementById('rep-turma').value.trim();
@@ -2440,7 +2459,7 @@ window.salvarReportagem = async function() {
     }
 
     const item = {
-      titulo, texto, autor, turma, categoria, destaque,
+      titulo, subtitulo, texto, autor, turma, categoria, destaque,
       data: dataFormatada,
       created_at: Date.now()
     };
@@ -2596,6 +2615,7 @@ async function carregarReportagens() {
             ${escapeHtml(r.data)}${r.autor ? ' · ✍️ ' + escapeHtml(r.autor) : ''}
           </p>
           <h2>${escapeHtml(r.titulo)}</h2>
+          ${r.subtitulo ? `<p class="card-subtitulo">${escapeHtml(r.subtitulo)}</p>` : ''}
           ${textoHtml}
         </div>
         <div class="acoes-editor" style="display:${editorLogado ? 'flex' : 'none'}">
